@@ -41,29 +41,26 @@ pvl_delta_nll <- function(par, choice, outcome) {
   -ll
 }
 
-# MULTI-START FIT: participant 1
-# optim() can get stuck (e.g., the flat corner at A=0, cons=0)
-# so run it from many random starting points and keep best result.
-set.seed(2026) # makes random starting points reproducible
-lower <- c(.01, .01, .01, .01)
+# Multi-Start Maximum likelihood fit of PVL-Delta for one participant.
+# optim() can get stuck, so run it from n_starts random starting points
+# and keep best. Lower limits are 0.01, not 0:
+# at exactly A=0 & cons =0 model is flat in every direction & optim() stops there.
+fit_pvl_delta <- function(choice, outcome, n_starts = 20) {
+lower <- c(.01, .01, .01, .01) # A, alppha, cons, lambda
 upper <- c(1, 2, 5, 10)
-n_starts <- 20
-
-values <- rep(NA, n_starts) # will hold each start's final value 
 best_value <- Inf
 
 for (s in 1:n_starts) {
-  start <- runif(4, min = lower, max=upper)
+  start <- runif(4, min=lower, max=upper)
   fit <- optim(
     par = start,
     fn = pvl_delta_nll,
-    choice = choice_h[1, ],
-    outcome = net_h[1, ],
+    choice = choice,
+    outcome = outcome,
     method = "L-BFGS-B",
     lower = lower,
     upper = upper
   )
-  values[s] <- fit$value
   if (fit$value < best_value) {
     best_value <- fit$value
     best_fit <- fit
@@ -71,4 +68,8 @@ for (s in 1:n_starts) {
 }
 
 best_fit
-round(values, 2)
+}
+
+# TEST: participant 1 should reproduce 128.0598
+set.seed(2026)
+fit_pvl_delta(choice_h[1, ], net_h[1, ])
