@@ -40,3 +40,35 @@ pvl_delta_nll <- function(par, choice, outcome) {
   
   -ll
 }
+
+# MULTI-START FIT: participant 1
+# optim() can get stuck (e.g., the flat corner at A=0, cons=0)
+# so run it from many random starting points and keep best result.
+set.seed(2026) # makes random starting points reproducible
+lower <- c(.01, .01, .01, .01)
+upper <- c(1, 2, 5, 10)
+n_starts <- 20
+
+values <- rep(NA, n_starts) # will hold each start's final value 
+best_value <- Inf
+
+for (s in 1:n_starts) {
+  start <- runif(4, min = lower, max=upper)
+  fit <- optim(
+    par = start,
+    fn = pvl_delta_nll,
+    choice = choice_h[1, ],
+    outcome = net_h[1, ],
+    method = "L-BFGS-B",
+    lower = lower,
+    upper = upper
+  )
+  values[s] <- fit$value
+  if (fit$value < best_value) {
+    best_value <- fit$value
+    best_fit <- fit
+  }
+}
+
+best_fit
+round(values, 2)
