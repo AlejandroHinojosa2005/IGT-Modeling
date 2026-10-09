@@ -35,7 +35,7 @@ for (k in 1:4) {
   abline(0,1)
 }
 
-# VPP recovery (slow: roughly an hour with 50 starts)
+# VPP recovery (slow: roughly an 20min with 50 starts)
 source("scripts/03_vpp.R")
 results_vpp <- readRDS("output/vpp_fit_horstmann.rds")
 
@@ -56,8 +56,27 @@ saveRDS(list(true = true_vpp, recovered = recovered_vpp), "output/vpp_recovery.r
 round(diag(cor(true_vpp, recovered_vpp)), 2)
 round(diag(cor(true_vpp, recovered_vpp, method = "spearman")), 2)
 
-par(mfrow = c(2, 4))
+par(mfrow = c(2, 4), mar = c(4,4,2,1))
 for (k in 1:8) {
   plot(true_vpp[, k], recovered_vpp[, k], xlab = "True", ylab = "Recovered", main = vpp_names[k])
   abline(0,1)
+}
+
+# How many estimates sit at a parameter limit? (out of 162)
+# True = real-data VPP fits: recovered = fits to the simulated
+
+cat("True values at a limit: \n")
+for (k in 1:8) {
+  at_limit <- true_vpp[, k] <= lower_vpp[k] + 0.001 |
+    true_vpp[, k] >= upper_vpp[k] - 0.001
+  cat(vpp_names[k], sum(at_limit), "\n")
+}
+
+cat("Recovered vlaues at a limit: \n")
+lower_vpp <- c(0.01, 0.01, 0.01, 0.01, -5, -5, 0.01, 0.01)
+upper_vpp <- c(1, 2, 5, 10, 5, 5, 1, 1)
+for (k in 1:8) {
+  at_limit <- recovered_vpp[, k] <= lower_vpp[k] + 0.001 |
+    recovered_vpp[, k] >= upper_vpp[k] - 0.001
+  cat(vpp_names[k], sum(at_limit), "\n")
 }
