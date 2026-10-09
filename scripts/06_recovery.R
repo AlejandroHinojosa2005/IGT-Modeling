@@ -34,3 +34,30 @@ for (k in 1:4) {
        main=colnames(true_par)[k])
   abline(0,1)
 }
+
+# VPP recovery (slow: roughly an hour with 50 starts)
+source("scripts/03_vpp.R")
+results_vpp <- readRDS("output/vpp_fit_horstmann.rds")
+
+vpp_names <- c("A", "alpha", "cons", "lambda", "epP", "epN", "K", "w")
+true_vpp <- as.matrix(results_vpp[, vpp_names])
+recovered_vpp <- matrix(NA, nrow = nrow(true_vpp), ncol = 8)
+colnames(recovered_vpp) <- vpp_names
+
+set.seed(2026)
+for (k in 1:nrow(true_vpp)) {
+  sim <- sim_vpp(true_vpp[k, ], deck_outcomes)
+  f <- fit_vpp(sim$choice, sim$outcome, n_starts = 50)
+  recovered_vpp[k, ] <- f$par
+}
+
+saveRDS(list(true = true_vpp, recovered = recovered_vpp), "output/vpp_recovery.rds")
+
+round(diag(cor(true_vpp, recovered_vpp)), 2)
+round(diag(cor(true_vpp, recovered_vpp, method = "spearman")), 2)
+
+par(mfrow = c(2, 4))
+for (k in 1:8) {
+  plot(true_vpp[, k], recovered_vpp[, k], xlab = "True", ylab = "Recovered", main = vpp_names[k])
+  abline(0,1)
+}
