@@ -53,3 +53,46 @@ orl_nll <- function(par, choice, outcome) {
   }
   -ll
 }
+
+# Simulate one ORL participant (used for parameter recovery).
+
+sim_orl <- function(par, deck_outcomes, n_trials = 100) {
+  Arew <- par[1]
+  Apun <- par[2]
+  Kprime <- par[3]
+  betaF <- par[4]
+  betaP <- par[5]
+  
+  K <- 3^Kprime - 1
+  Ev <- c(0, 0, 0, 0)
+  EF <- c(0, 0, 0, 0)
+  PS <- c(0, 0, 0, 0)
+  choice <- rep(NA, n_trials)
+  outcome <- rep(NA, n_trials)
+  
+  for (t in 1:n_trials) {
+    # combined value (Eq. 12) -> choice probabilities (softmax, theta=1)
+    V <- Ev + EF * betaF + PS * betaP
+    p <- exp(V - max(V)) / sum(exp(V - max(V)))
+    j <- sample(1:4, size = 1, prob=p)
+    choice[t] <- j
+    outcome[t] <- sample(deck_outcomes[[j]], size = 1)
+    
+    # learning: identical to orl_nll steps 4-8
+    x <- outcome[t] / 100
+    sgn <- sign(x)
+    if (x >= 0) {
+      a_chosen <- Arew
+      a_unchosen <- Apun
+    } else {
+      a_chosen <- Apun
+      a_unchosen <- Arew
+    }
+    Ev[j] <- Ev[j] + a_chosen * (x - Ev[j])
+    EF[j] <- EF[j] + a_chosen * (sgn - EF[j])
+    EF[-j] <- EF[-j] + a_unchosen * (-sgn / 3 - EF[-j])
+    PS <- PS / (1 + K)
+    PS[j] <- 1 / (1+K)
+  }
+  list(choice=choice,outcome=outcome)
+}
