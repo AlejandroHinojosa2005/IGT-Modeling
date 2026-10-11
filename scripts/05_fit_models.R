@@ -46,3 +46,39 @@ for (i in 1:n_subj) {
 }
 
 saveRDS(results_vpp, "output/vpp_fit_horstmann.rds")
+
+# ORL: fit every participant (20 starts; starts agreed for participant 1)
+source("scripts/04_orl.R")
+n_subj <- nrow(choice_h)
+
+set.seed(2026)
+results_orl <- data.frame(
+  subj = 1:n_subj,
+  Arew = NA, Apun = NA, Kprime = NA, betaF = NA, betaP = NA, nll = NA, conv = NA
+)
+
+for (i in 1:n_subj) {
+  f <- fit_orl(choice_h[i, ], net_h[i, ])
+  results_orl[i, c("Arew", "Apun", "Kprime", "betaF", "betaP")] <- f$par
+  results_orl$nll[i] <- f$value
+  results_orl$conv[i] <- f$convergence
+}
+
+saveRDS(results_orl, "output/orl_fit_horstmann.rds")
+
+# Check: is the betaP limit (+/-10) costing fit?
+# Refit only participants whose betaP hit the limit, with limits
+source("scripts/04_orl.R")
+results_orl <- readRDS("output/orl_fit_horstmann.rds")
+pinned <- which(abs(results_orl$betaP) >= 9.999)
+nll_wide <- rep(NA, length(pinned))
+
+set.seed(2026)
+for (n in 1:length(pinned)) {
+  i <- pinned[n]
+  nll_wide[n] <- fit_orl(choice_h[i, ], net_h[i, ], beta_lim = 30)$value
+}
+
+improve <- results_orl$nll[pinned] - nll_wide # positive = wider limit fits better
+summary(improve)
+sum(improve > 1)
