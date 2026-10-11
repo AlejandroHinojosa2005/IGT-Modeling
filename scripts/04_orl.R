@@ -101,9 +101,9 @@ sim_orl <- function(par, deck_outcomes, n_trials = 100) {
 # Learning-rate lower limits are 0.01, not 0: both at 0 & betaP=0
 # nothing in the model can change and optim() stops at chance.
 # betaF & betaP limits (+/-10) are my choice; unbounded in the paper.
-fit_orl <- function(choice, outcome, n_starts = 20) {
-  lower <- c(0.01, 0.01, 0, -10, -10)
-  upper <- c(1, 1, 5, 10,10)
+fit_orl <- function(choice, outcome, n_starts = 20, beta_lim = 10) {
+  lower <- c(0.01, 0.01, 0, -beta_lim, -beta_lim)
+  upper <- c(1, 1, 5, beta_lim, beta_lim)
   best_value <- Inf
   
   for  (s in 1:n_starts) {
