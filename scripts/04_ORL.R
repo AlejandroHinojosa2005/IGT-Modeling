@@ -96,3 +96,32 @@ sim_orl <- function(par, deck_outcomes, n_trials = 100) {
   }
   list(choice=choice,outcome=outcome)
 }
+
+# Multi-start maximum likelihood fit or ORL for one participant.
+# Learning-rate lower limits are 0.01, not 0: both at 0 & betaP=0
+# nothing in the model can change and optim() stops at chance.
+# betaF & betaP limits (+/-10) are my choice; unbounded in the paper.
+fit_orl <- function(choice, outcome, n_starts = 20) {
+  lower <- c(0.01, 0.01, 0, -10, -10)
+  upper <- c(1, 1, 5, 10,10)
+  best_value <- Inf
+  
+  for  (s in 1:n_starts) {
+    start <- runif(5, min=lower, max=upper)
+    fit <- optim(
+      par = start,
+      fn = orl_nll,
+      choice = choice,
+      outcome = outcome,
+      method = "L-BFGS-B",
+      lower = lower,
+      upper = upper,
+      control = list(maxit = 1000)
+    )
+    if (fit$value < best_value) {
+      best_value <- fit$value
+      best_fit <- fit
+    }
+  }
+  best_fit
+}
