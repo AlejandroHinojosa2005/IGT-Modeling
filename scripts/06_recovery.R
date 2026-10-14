@@ -80,3 +80,47 @@ for (k in 1:8) {
     recovered_vpp[, k] >= upper_vpp[k] - 0.001
   cat(vpp_names[k], sum(at_limit), "\n")
 }
+
+# ORL recovery (20 starts; ORL's starts agreed for participant 1)
+source("scripts/04_orl.R")
+results_orl <- readRDS("output/orl_fit_horstmann.rds")
+
+orl_names <- c("Arew", "Apun", "Kprime", "betaF", "betaP")
+true_orl <- as.matrix(results_orl[, orl_names])
+recovered_orl <- matrix(NA, nrow = nrow(true_orl), ncol = 5)
+colnames(recovered_orl) <- orl_names
+
+set.seed(2026)
+for (k in 1:nrow(true_orl)) {
+  sim <- sim_orl(true_orl[k, ], deck_outcomes)
+  f <- fit_orl(sim$choice, sim$outcome)
+  recovered_orl[k, ] <- f$par
+}
+
+saveRDS(list(true = true_orl, recovered = recovered_orl), "output/orl_recovery.rds")
+
+round(diag(cor(true_orl, recovered_orl)), 2)
+round(diag(cor(true_orl, recovered_orl, method = "spearman")), 2)
+
+par(mfrow = c(2,3), mar = c(4,4,2,1))
+for (k in 1:5) {
+  plot(true_orl[, k], recovered_orl[, k], xlab = "True", ylab = "Recovered", main = orl_names[k])
+  abline(0,1)
+}
+
+# how many estimates sit at a limit? (out of 162)
+# True = real-data ORL fits; recovered = fits to the simulated data
+lower_orl <- c(.01,.01,0,-10,-10)
+upper_orl <- c(1,1,5,10,10)
+
+cat("True values at limit:\n")
+for (k in 1:5) {
+  at_limit <- true_orl[, k] <= lower_orl[k] + .001 | true_orl[, k] >= upper_orl[k] -.001
+  cat(orl_names[k], sum(at_limit), "\n")
+}
+
+cat("Recovered values at a limit:\n")
+for (k in 1:5) {
+  at_limit <- recovered_orl[,k] <= lower_orl[k] + .001 | recovered_orl[,k] >= upper_orl[k] - .001
+  cat(orl_names[k], sum(at_limit), "\n")
+}
