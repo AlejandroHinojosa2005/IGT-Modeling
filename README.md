@@ -90,9 +90,19 @@ Correlation between true and recovered values (Pearson / Spearman), 162 simulate
 | VPP | A .63/.63, α .53/.54, c .59/.67, λ .59/.59, ε_P .80/.83, ε_N .70/.66, K .75/.69, w .57/.60 |
 | ORL | A_rew .87/.86, A_pun .86/.86, K′ .55/.67, βF .87/.84, βP .85/.85 |
 
+**PVL-Delta**
+
 ![PVL-Delta parameter recovery](output/figures/recovery_pvl_delta.png)
+
+**VPP**
+
 ![VPP parameter recovery](output/figures/recovery_vpp.png)
+
+**ORL**
+
 ![ORL parameter recovery](output/figures/recovery_orl.png)
+
+*Each point is one simulated participant; the line marks perfect recovery. Columns of points at a plot's edge are estimates sitting at a parameter limit.*
 
 <!-- WRITE (2–3 sentences): PVL-Delta and ORL recover well, except ORL's K′ (the βP–K tradeoff); VPP's extra parameters made its shared parameters harder to recover; many estimates sit at a bound (true → recovered: VPP λ 87 → 61, ORL βP 65 → 51); βP recovers its sign more than its size for participants at the limit. Possible 2024 citation: Haynes et al. (2024). CHECK the paper before saying they dropped K for poor recovery. -->
 
