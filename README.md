@@ -78,7 +78,13 @@ Across all 100 trials, participants chose deck A on 14.5% of trials, B on 34.8%,
 | Best model, by participant (AIC) | 14 | 64 | 84 |
 | Best model, by participant (BIC) | 33 | 18 | 111 |
 
-<!-- WRITE (2–3 sentences): ORL wins both totals; BIC is decisive (gap 1,357) while AIC is close (gap 91). VPP fits the choices better in raw terms (summed nll 440.7 lower) but not by enough to pay for three extra parameters. Different people are best fit by different models. -->
+ORL fit best on both criteria: BIC was decisive (a gap of 1,357 over VPP),
+while AIC’s gap was much smaller (91, about 0.6 per participant). 
+VPP actually fits the choices better in raw terms (summed nll 440.7 lower than ORL’s),
+but not by enough to justify its three extra parameters.
+PVL-Delta was worst on both. One last observation: 
+different people are best fit by different models;
+under AIC, ORL won for 84 participants, VPP for 64, and PVL-Delta for 14.
 
 ### Parameter recovery
 
@@ -104,7 +110,12 @@ Correlation between true and recovered values (Pearson / Spearman), 162 simulate
 
 *Each point is one simulated participant; the line marks perfect recovery. Columns of points at a plot's edge are estimates sitting at a parameter limit.*
 
-<!-- WRITE (2–3 sentences): PVL-Delta and ORL recover well, except ORL's K′ (the βP–K tradeoff); VPP's extra parameters made its shared parameters harder to recover; many estimates sit at a bound (true → recovered: VPP λ 87 → 61, ORL βP 65 → 51); βP recovers its sign more than its size for participants at the limit. Possible 2024 citation: Haynes et al. (2024). CHECK the paper before saying they dropped K for poor recovery. -->
+PVL-Delta & ORL recovered well, except for ORL’s K′ (Pearson r = .55, Spearman ρ = .67), likely due to the trade-off between βP & K;
+this is consistent with Haynes et al. (2024), who removed K from their ORL because it recovered poorly.
+VPP’s extra parameters made the parameters it shares with PVL-Delta (A, α, c, λ) harder to recover (.53–.67, vs. .75–.89 in PVL-Delta),
+likely because w trades off with c and A. As seen on the recovery plots,
+many estimates sit at a bound (e.g., 87 of 162 VPP λ values and 65 ORL βP values).
+For participants at the limit, βP recovers its sign better than its size.
 
 ### Sensitivity to parameter limits
 
@@ -113,9 +124,10 @@ Correlation between true and recovered values (Pearson / Spearman), 162 simulate
 | ORL βP | 65 | ±10 → ±30 | 30.6 | 4 |
 | VPP ε_P/ε_N | 69 | ±5 → ±15 | 2.6 | 10 |
 
-Neither change alters the model ranking.
-
-<!-- WRITE (1–2 sentences): the limits didn't drive the comparison. Participants pinned at the βP limit had higher K′ (median 1.49 vs. 0.25): when perseveration fades fast, it needs a large weight to matter. -->
+Widening the limits barely changed the fits (total nll gains of 30.6 for ORL and 2.6 for VPP)
+and didn’t change the model ranking, so the limits didn’t drive the comparison.
+Participants at the βP limit had higher K′ than the other participants (median 1.49 vs. 0.25),
+likely because when perseveration fades fast, it needs a large weight to affect choices at all.
 
 ### Generative check: win-stay/lose-shift
 
@@ -127,11 +139,21 @@ Neither change alters the model ranking.
 
 ![Observed vs. simulated win-stay/lose-shift](output/figures/wsls_observed_vs_simulated.png)
 
-ORL under-produces win-stay/lose-shift (paired difference 0.085, 95% CI [0.06, 0.11], t(161) = 7.2, p < .001; observed exceeds simulated for 71% of participants). VPP does not differ reliably from observed (mean difference 0.007, 95% CI [−0.006, 0.021], t(161) = 1.06, p = .29; observed exceeds simulated for 56% of participants).
+ORL under-produces win-stay/lose-shift (paired difference 0.085, 95% CI [0.06, 0.11], t(161) = 7.2, p < .001;
+observed exceeds simulated for 71% of participants). VPP does not differ reliably from observed
+(mean difference 0.007, 95% CI [−0.006, 0.021], t(161) = 1.06, p = .29;
+observed exceeds simulated for 56% of participants).
 
-<!-- WRITE (1–2 sentences): ORL tracks who has high or low win-stay/lose-shift but underpredicts how much; VPP, whose perseveration depends on the last outcome, gets both. -->
+ORL tracks who has high or low WSLS (r = .77) but underpredicts how much (mean 0.21 vs. 0.30 observed),
+and the gap grows for participants with strong WSLS. VPP, whose perseveration depends on whether
+the last outcome was a gain or a loss, reproduces both: who has high or low WSLS (r = .93)
+and how much (0.29 vs. 0.30).
 
-<!-- WRITE (2–3 sentences, closing): ORL is the best overall account and most of its parameters recover, but it misses win-stay/lose-shift. Lead into the planned extension. -->
+Overall, ORL is the best account of these choices: it wins on both total AIC and BIC,
+and most of its parameters recover well. But it misses win-stay/lose-shift, which VPP reproduces.
+A likely reason is that VPP’s perseveration depends on whether the last outcome was a gain or a loss,
+while ORL’s ignores outcomes. Testing that explanation, by adding outcome-dependent perseveration to ORL,
+is the planned extension below.
 
 ## Limitations
 
@@ -145,9 +167,10 @@ ORL under-produces win-stay/lose-shift (paired difference 0.085, 95% CI [0.06, 0
 
 ## Planned extension: outcome-dependent perseveration in ORL
 
-<!-- This section records predictions BEFORE testing. Commit it before writing any variant code. -->
 
-**Motivation:** ORL fit best by total AIC & BIC, but its perseveration ignores outcomes, and it underpredicts how much participants stay after gains and switch after losses (win-stay, lose-shift). VPP, whose perseveration depends on whether the last outcome was a gain or a loss, comes much closer (see "Generative check").
+**Motivation:** ORL fit best by total AIC & BIC, but its perseveration ignores outcomes,
+and it underpredicts how much participants stay after gains and switch after losses (win-stay, lose-shift).
+VPP, whose perseveration depends on whether the last outcome was a gain or a loss, comes much closer (see "Generative check").
 
 **Proposed variant:** What I want to work on next is an ORL variant that splits perseveration into separate traces after gains and after losses, each with its own weight (βP_win, βP_loss); it reduces to ORL when the two weights are equal (6 parameters vs. 5).
 
@@ -157,9 +180,12 @@ ORL under-produces win-stay/lose-shift (paired difference 0.085, 95% CI [0.06, 0
 3. It reproduces the observed win-stay, lose-shift.
 4. Its new parameters recover acceptably (otherwise prediction 2 can't be interpreted).
 
-**Test sample:** The hypothesis came from the Horstmann data, so the confirmatory test uses a held-out study from the same pool with the same task: Steingroever et al. (in preparation, listed in the 2015 data paper), N = 70, 100 trials, payoff scheme 2 (labeled `SteingroverInPrep` in the data file).
+**Test sample:** The hypothesis came from the Horstmann data, so the confirmatory test uses
+a held-out study from the same pool with the same task: Steingroever et al.
+(in preparation, listed in the 2015 data paper), N = 70, 100 trials, payoff scheme 2 (labeled `SteingroverInPrep` in the data file).
 
-**Status:** written [date], before any variant code or fitting. Not a formal preregistration, since the discovery data had already been analyzed.
+**Status:** written October 18, 2026, before any variant code or fitting. Not a formal preregistration,
+since the discovery data had already been analyzed.
 
 ## Next steps
 
@@ -193,7 +219,10 @@ Goals:
 - Understand how scientists use computational methods in research relating to Computational Psychology
 
 Assistance:
-I used Anthropic's Opus 5.5 on Extra as a tutor: it explained the models' equations and R syntax, reviewed my code for errors, and helped draft and edit this write-up. I implemented the three models from their published equations (Ahn et al., 2008; Worthy, Pang & Byrne, 2013; Haines, Vassileva & Ahn, 2018), following hBayesDM's outcome scaling and consulting its ORL code (Ahn, Haines & Zhang, 2017). I wrote and ran the code myself in RStudio.
+I used Anthropic's Opus 5.5 on Extra as a tutor: it explained the models' equations and R syntax,
+reviewed my code for errors, and helped edit this write-up. I implemented the three models from their published equations
+(Ahn et al., 2008; Worthy, Pang & Byrne, 2013; Haines, Vassileva & Ahn, 2018), following hBayesDM's outcome scaling and consulting
+its ORL code (Ahn, Haines & Zhang, 2017). I wrote and ran the code myself in RStudio.
 
 ## References
 
@@ -207,8 +236,6 @@ I used Anthropic's Opus 5.5 on Extra as a tutor: it explained the models' equati
 - Steingroever, H., Wetzels, R., Horstmann, A., Neumann, J., & Wagenmakers, E.-J. (2013). Performance of healthy participants on the Iowa Gambling Task. *Psychological Assessment, 25*(1), 180–193.
 - Steingroever, H., et al. (2015). Data from 617 healthy participants performing the Iowa Gambling Task: A "many labs" collaboration. *Journal of Open Psychology Data, 3*(1), e5. https://doi.org/10.5334/jopd.ak
 - Worthy, D. A., Pang, B., & Byrne, K. A. (2013). Decomposing the roles of perseveration and expected value representation in models of the Iowa Gambling Task. *Frontiers in Psychology, 4*, 640.
-- Worthy, D. A., Hawthorne, M. J., & Otto, A. R. (2013). Heterogeneity of strategy use in the Iowa gambling task: A comparison of win-stay/lose-shift and reinforcement learning models. *Psychonomic Bulletin & Review, 20*, 364–371.
-<!-- CHECK: Worthy, Hawthorne & Otto is not yet cited in the text; cite it (e.g., at the generative check) or remove it. Add your other 2024+ references once they're cited in the text. Haynes et al. is only a candidate citation in a hidden note so far; cite it in the text if you keep it. -->
 
 ## License
 
