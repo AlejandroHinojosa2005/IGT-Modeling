@@ -50,3 +50,22 @@ for (i in 1:nrow(est_vpp)) {
 }
 summary(wsls_sim_vpp)
 cor(wsls_obs, wsls_sim_vpp, use = "complete.obs")
+
+# Observed vs. Simulated wsls
+# (output/figures/wsls_observed_vs_simulated.png)
+
+dir.create("output/figures", showWarnings = FALSE)
+lims <- range(c(wsls_obs, wsls_sim, wsls_sim_vpp), na.rm = TRUE)
+
+png("output/figures/wsls_observed_vs_simulated.png", width = 2000, height = 1000, res = 200)
+par(mfrow = c(1,2))
+
+plot(wsls_obs, wsls_sim, xlim = lims, ylim = lims, pch = 16, col = rgb(0,0,0,0.4),
+     xlab = "Observed WSLS", ylab = "Simulated WSLS", main = "ORL")
+abline(0,1,lty=2)
+
+plot(wsls_obs, wsls_sim_vpp, xlim = lims, ylim = lims, pch = 16, col = rgb(0,0,0,0.4),
+     xlab = "Observed WSLS", ylab = "Simulated WSLS", main = "VPP")
+abline(0,1, lty =2)
+
+dev.off()
