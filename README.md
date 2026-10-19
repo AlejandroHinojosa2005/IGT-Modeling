@@ -49,9 +49,7 @@ The data are **not** included in this repository. To run the code, download `IGT
 
 **Model Fitting:** I fit each model separately to each participant by maximum likelihood. For a given set of parameters, the model assigns a probability (via softmax) to the deck the participant chose on each trial; the likelihood is the product of those 100 probabilities, then I searched for the parameters that made the observed sequence of choices most probable. This was done by summing the log-probabilities instead of multiplying the probabilities. This was done because a product of 100 small numbers shrinks toward 0, and minimized the negative of that sum (the negative log-likelihood (nll)). The log-softmax was computed by subtracting the largest value before exponentiating, that way large values don't overflow.
 
-I used R's "optim" with the L-BFGS-B method, which allows bounds on each parameter, and ran it from 20 random starting points per participant (50 for VPP), keeping the best fit, because the likelihood surface can have local minima that trap single search. VPP's iteration limit was raised to 1,000 because its fits were stopping before converging under the original 100. Lower bounds were set to 0.01 rather than 0 because at A = 0 & c = 0 the likelihood surface is flat, and the optimizer stopped there at chance-level fits. For reference, a participant choosing at random has an nll of 100 x ln 4 ≈ 138.63. The random seed was set at "2026" for ease of memory. As checks on the code,
-
-I confirmed that each likelihood returns 138.63 when its parameters make every choice equally likely, and that VPP never fit a participant worse than PVL-Delta (it can't, since w = 1 reproduces PVL-Delta exactly). Of the 486 best fits (162 participants × 3 models), 5 ended with optim’s code 52 (the line search stopped without confirming convergence) rather than 0: 1 for PVL-Delta, 2 for VPP, and 2 for ORL.
+I used R's "optim" with the L-BFGS-B method, which allows bounds on each parameter, and ran it from 20 random starting points per participant (50 for VPP), keeping the best fit, because the likelihood surface can have local minima that trap a single search. VPP's iteration limit was raised to 1,000 because its fits were stopping before converging under the original 100. Lower bounds were set to 0.01 rather than 0 because at A = 0 & c = 0 the likelihood surface is flat, and the optimizer stopped there at chance-level fits. For reference, a participant choosing at random has an nll of 100 x ln 4 ≈ 138.63. The random seed was set at "2026" for ease of memory. As checks on the code, I confirmed that each likelihood returns 138.63 when its parameters make every choice equally likely, and that VPP never fit a participant worse than PVL-Delta (it can't, since w = 1 reproduces PVL-Delta exactly). Of the 486 best fits (162 participants × 3 models), 5 ended with optim's code 52 (the line search stopped without confirming convergence) rather than 0: 1 for PVL-Delta, 2 for VPP, and 2 for ORL.
 
 **Model Comparison:** I compared models with AIC = 2·nll + 2k and BIC = 2·nll + k·ln(n), where k = # of parameters (4 for PVL-Delta, 8 for VPP, 5 for ORL) and n = 100 trials per participant. Both start from how well the model fits (2·nll) and add a penalty for each parameter; (lower = better). Each was summed across participants, I also noted which model won for each participant under each criterion. I used two methods because BIC charges ~4.6 per parameter instead of 2, so it penalizes VPP's eight parameters more heavily. Reporting both tells me whether the ranking depends on that choice.
 
@@ -59,7 +57,7 @@ I confirmed that each likelihood returns 138.63 when its parameters make every c
 
 **Bound Sensitivity Checks:** Participants whose perseveration estimates landed on a "bound" (limit) were refit with wider bounds (ORL βP: ±10 → ±30; VPP ε_P and ε_N: ±5 → ±15). I compared their nll before and after and checked whether the model ranking changed, to see whether the bounds I chose for the perseveration parameters were constraining the fits.
 
-**Generative Check:** A model can fit choices well overall and still fail to reproduce a specific behavior, so I checked whether ORL & VPP reproduce win-stay/lose-shift (WSLS), defined as P(stay after gain) - P(stay after loss). For each participant, I simulated 20 datasets from their fitted parameters, computed WSLS for each, and averaged them. I compared observed and simulated WSLS across participants with a correlation and a paired t-test.
+**Generative Check:** A model can fit choices well overall and still fail to reproduce a specific behavior, so I checked whether ORL & VPP reproduce win-stay/lose-shift (WSLS), defined as P(stay after gain) - P(stay after loss), with outcomes of 0 counted as gains. For each participant, I simulated 20 datasets from their fitted parameters, computed WSLS for each, and averaged them. I compared observed and simulated WSLS across participants with a correlation and a paired t-test.
 
 **Software:** R 4.6.1 (in RStudio) was used for all analyses, with optim from R's built-in stats package, and renv to record package versions so the analysis can be rerun with the same setup. The code for each step is in "scripts/", numbered in the order the scripts run.
 
@@ -67,7 +65,7 @@ I confirmed that each likelihood returns 138.63 when its parameters make every c
 
 ### Behavior
 
-<!-- TO RUN: table(choice_h) / length(choice_h). WRITE (1–2 sentences): how often participants chose each deck, and observed win-stay/lose-shift (mean 0.30, median 0.26). This also checks the deck B example under Models. -->
+Across all 100 trials, participants chose deck A on 14.5% of trials, B on 34.8%, C on 20.1%, and D on 30.5%. The winning decks (C & D) received only about half of all choices (50.6%), while the two decks that rarely produce a loss (B & D) received about two thirds (65.3%); deck B, a losing deck, was chosen most often. Observed win-stay/lose-shift averaged 0.30 (median 0.26).
 
 ### Model comparison
 
@@ -80,7 +78,7 @@ I confirmed that each likelihood returns 138.63 when its parameters make every c
 | Best model, by participant (AIC) | 14 | 64 | 84 |
 | Best model, by participant (BIC) | 33 | 18 | 111 |
 
-<!-- WRITE (2–3 sentences): ORL wins both totals; BIC is decisive (gap 1,357) while AIC is close (gap 91). VPP fits the choices better in raw terms (summed nll about 440 lower; confirm with sum()) but not by enough to pay for three extra parameters. Different people are best fit by different models. -->
+<!-- WRITE (2–3 sentences): ORL wins both totals; BIC is decisive (gap 1,357) while AIC is close (gap 91). VPP fits the choices better in raw terms (summed nll 440.7 lower) but not by enough to pay for three extra parameters. Different people are best fit by different models. -->
 
 ### Parameter recovery
 
@@ -113,7 +111,7 @@ Neither change alters the model ranking.
 | ORL simulated | 0.21 | 0.18 | .77 |
 | VPP simulated | 0.29 | 0.24 | .93 |
 
-ORL under-produces win-stay/lose-shift (paired difference 0.085, 95% CI [0.06, 0.11], t(161) = 7.2, p < .001; observed exceeds simulated for 71% of participants). VPP [ADD: VPP paired test result].
+ORL under-produces win-stay/lose-shift (paired difference 0.085, 95% CI [0.06, 0.11], t(161) = 7.2, p < .001; observed exceeds simulated for 71% of participants). VPP does not differ reliably from observed (mean difference 0.007, 95% CI [−0.006, 0.021], t(161) = 1.06, p = .29; observed exceeds simulated for 56% of participants).
 
 <!-- WRITE (1–2 sentences): ORL tracks who has high or low win-stay/lose-shift but underpredicts how much; VPP, whose perseveration depends on the last outcome, gets both. -->
 
@@ -121,19 +119,19 @@ ORL under-produces win-stay/lose-shift (paired difference 0.085, 95% CI [0.06, 0
 
 ## Limitations
 
-1. There are issues of heterogeneity: many healthy participants never learn to favor the winning decks (Steingroever et al., 2013), but we still use it regularly to assess decision-making deficits. This should make us question our belief in the test's validity.
+1. There are issues of heterogeneity: many healthy participants never learn to favor the winning decks (Steingroever et al., 2013; here, the winning decks received only 50.6% of all choices), but we still use it regularly to assess decision-making deficits. This should make us question our belief in the test's validity.
 2. I used per-participant maximum likelihood rather than a hierarchical estimation.
 3. I only refit perseveration parameters with wider limits, there were cases (e.g., VPP λ and A) that were not rechecked.
 4. The simulator function used draws outcomes at random from each deck rather than using the task's actual card sequence.
 5. AIC & BIC count parameters rather than assessing the model's actual flexibility.
-6. No model recovery was assessed (simulating data from each model and checking whether AIC & BIC pick the model that generated it), so I can’t yet confirm the comparison can tell these models apart.
+6. No model recovery was assessed (simulating data from each model and checking whether AIC & BIC pick the model that generated it), so I can't yet confirm the comparison can tell these models apart.
 7. I used one dataset of healthy adults, so the results may not hold for clinical groups or other payoff schemes.
 
 ## Planned extension: outcome-dependent perseveration in ORL
 
 <!-- This section records predictions BEFORE testing. Commit it before writing any variant code. -->
 
-**Motivation:** ORL fit best by total AIC & BIC, but its perseveration ignores outcomes, and it underpredicts how much participants stay after gains and switch after losses (win-stay, lose-shift). VPP does not differ reliably from observed (mean difference 0.007, 95% CI [−0.006, 0.021], t(161) = 1.06, p = .29; observed exceeds simulated for 56% of participants).
+**Motivation:** ORL fit best by total AIC & BIC, but its perseveration ignores outcomes, and it underpredicts how much participants stay after gains and switch after losses (win-stay, lose-shift). VPP, whose perseveration depends on whether the last outcome was a gain or a loss, comes much closer (see "Generative check").
 
 **Proposed variant:** What I want to work on next is an ORL variant that splits perseveration into separate traces after gains and after losses, each with its own weight (βP_win, βP_loss); it reduces to ORL when the two weights are equal (6 parameters vs. 5).
 
@@ -143,8 +141,7 @@ ORL under-produces win-stay/lose-shift (paired difference 0.085, 95% CI [0.06, 0
 3. It reproduces the observed win-stay, lose-shift.
 4. Its new parameters recover acceptably (otherwise prediction 2 can't be interpreted).
 
-**Test sample:** The hypothesis came from the Horstmann data, so the confirmatory test uses a held-out study from the same pool with the same task: Steingroever et al. (in preparation, listed in the 2015 data paper), N = 70, 100 trials, payoff scheme 2.
-<!-- CHECK: find its label with table(index_100[, "Study"]). -->
+**Test sample:** The hypothesis came from the Horstmann data, so the confirmatory test uses a held-out study from the same pool with the same task: Steingroever et al. (in preparation, listed in the 2015 data paper), N = 70, 100 trials, payoff scheme 2 (labeled `SteingroverInPrep` in the data file).
 
 **Status:** written [date], before any variant code or fitting. Not a formal preregistration, since the discovery data had already been analyzed.
 
@@ -180,7 +177,7 @@ Goals:
 - Understand how scientists use computational methods in research relating to Computational Psychology
 
 Assistance:
-I used Anthropic's Opus 5.5 on Extra as a tutor: it explained the models' equations and R syntax, reviewed my code for errors, and helped edit this write-up. I implemented the three models from their published equations (Ahn et al., 2008; Worthy, Pang & Byrne, 2013; Haines, Vassileva & Ahn, 2018), following hBayesDM's outcome scaling and consulting its ORL code (Ahn, Haines & Zhang, 2017). I wrote and ran the code myself in RStudio.
+I used Anthropic's Opus 5.5 on Extra as a tutor: it explained the models' equations and R syntax, reviewed my code for errors, and helped draft and edit this write-up. I implemented the three models from their published equations (Ahn et al., 2008; Worthy, Pang & Byrne, 2013; Haines, Vassileva & Ahn, 2018), following hBayesDM's outcome scaling and consulting its ORL code (Ahn, Haines & Zhang, 2017). I wrote and ran the code myself in RStudio.
 
 ## References
 
@@ -195,7 +192,8 @@ I used Anthropic's Opus 5.5 on Extra as a tutor: it explained the models' equati
 - Steingroever, H., et al. (2015). Data from 617 healthy participants performing the Iowa Gambling Task: A "many labs" collaboration. *Journal of Open Psychology Data, 3*(1), e5. https://doi.org/10.5334/jopd.ak
 - Worthy, D. A., Pang, B., & Byrne, K. A. (2013). Decomposing the roles of perseveration and expected value representation in models of the Iowa Gambling Task. *Frontiers in Psychology, 4*, 640.
 - Worthy, D. A., Hawthorne, M. J., & Otto, A. R. (2013). Heterogeneity of strategy use in the Iowa gambling task: A comparison of win-stay/lose-shift and reinforcement learning models. *Psychonomic Bulletin & Review, 20*, 364–371.
-<!-- CHECK: Worthy, Hawthorne & Otto is not yet cited in the text; cite it (e.g., at the generative check) or remove it. Confirm the data paper's reference [10] is the Steingroever et al. (2013) Psychological Assessment paper. Add your other 2024+ references once they're cited in the text. Haynes et al. is only a candidate citation in a hidden note so far; cite it in the text if you keep it. -->
+<!-- CHECK: Worthy, Hawthorne & Otto is not yet cited in the text; cite it (e.g., at the generative check) or remove it. Add your other 2024+ references once they're cited in the text. Haynes et al. is only a candidate citation in a hidden note so far; cite it in the text if you keep it. -->
 
 ## License
 
+MIT License: see `LICENSE`. The data are not included and keep their own OSF license (CC BY-SA 4.0).
