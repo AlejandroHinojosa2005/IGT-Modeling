@@ -90,6 +90,10 @@ Correlation between true and recovered values (Pearson / Spearman), 162 simulate
 | VPP | A .63/.63, α .53/.54, c .59/.67, λ .59/.59, ε_P .80/.83, ε_N .70/.66, K .75/.69, w .57/.60 |
 | ORL | A_rew .87/.86, A_pun .86/.86, K′ .55/.67, βF .87/.84, βP .85/.85 |
 
+![PVL-Delta parameter recovery](output/figures/recovery_pvl_delta.png)
+![VPP parameter recovery](output/figures/recovery_vpp.png)
+![ORL parameter recovery](output/figures/recovery_orl.png)
+
 <!-- WRITE (2–3 sentences): PVL-Delta and ORL recover well, except ORL's K′ (the βP–K tradeoff); VPP's extra parameters made its shared parameters harder to recover; many estimates sit at a bound (true → recovered: VPP λ 87 → 61, ORL βP 65 → 51); βP recovers its sign more than its size for participants at the limit. Possible 2024 citation: Haynes et al. (2024). CHECK the paper before saying they dropped K for poor recovery. -->
 
 ### Sensitivity to parameter limits
@@ -110,6 +114,8 @@ Neither change alters the model ranking.
 | Observed | 0.30 | 0.26 | – |
 | ORL simulated | 0.21 | 0.18 | .77 |
 | VPP simulated | 0.29 | 0.24 | .93 |
+
+![Observed vs. simulated win-stay/lose-shift](output/figures/wsls_observed_vs_simulated.png)
 
 ORL under-produces win-stay/lose-shift (paired difference 0.085, 95% CI [0.06, 0.11], t(161) = 7.2, p < .001; observed exceeds simulated for 71% of participants). VPP does not differ reliably from observed (mean difference 0.007, 95% CI [−0.006, 0.021], t(161) = 1.06, p = .29; observed exceeds simulated for 56% of participants).
 
