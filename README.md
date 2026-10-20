@@ -1,7 +1,13 @@
 # Reinforcement-learning models of the Iowa Gambling Task
 
-<!-- (2–3 sentences): what this project is, why you did it, and the headline result. -->
-[Summary]
+I implemented three reinforcement-learning models of the Iowa Gambling Task
+(PVL-Delta, VPP, and ORL) in R from their published equations and fit them
+to 162 healthy adults by maximum likelihood. I then compared the models
+(AIC/BIC), ran parameter recovery, and checked whether each model could
+reproduce participants’ win-stay/lose-shift behavior. ORL fit best overall,
+but it under-produced win-stay/lose-shift, which VPP reproduced. Next,
+I plan to test an ORL variant whose perseveration depends on whether the
+last outcome was a gain or a loss.
 
 **Status:** Personal learning project, October 2026.
 
@@ -38,6 +44,7 @@ Implementation notes:
 - Equations follow Haines et al. (2018). My ORL code was written from the published equations and checked against the hBayesDM Stan implementation (`igt_orl.stan`); no code was copied.
 - Outcomes are divided by 100 (hBayesDM's default scale), so estimates are comparable to hBayesDM's.
 - The papers leave VPP's ε and ORL's β parameters unbounded; the limits above are my choice (see "Sensitivity to parameter limits").
+- ORL's decay K is fitted on a transformed scale, K′, with K = 3^K′ − 1 (following hBayesDM); K′ is what the tables and figures report.
 
 ## Data
 
@@ -111,7 +118,7 @@ Correlation between true and recovered values (Pearson / Spearman), 162 simulate
 *Each point is one simulated participant; the line marks perfect recovery. Columns of points at a plot's edge are estimates sitting at a parameter limit.*
 
 PVL-Delta & ORL recovered well, except for ORL’s K′ (Pearson r = .55, Spearman ρ = .67), likely due to the trade-off between βP & K;
-this is consistent with Haynes et al. (2024), who removed K from their ORL because it recovered poorly.
+this is consistent with Haynes et al. (2024), who removed K from their ORL for the play-or-pass IGT because it recovered poorly.
 VPP’s extra parameters made the parameters it shares with PVL-Delta (A, α, c, λ) harder to recover (.53–.67, vs. .75–.89 in PVL-Delta),
 likely because w trades off with c and A. As seen on the recovery plots,
 many estimates sit at a bound (e.g., 87 of 162 VPP λ values and 65 ORL βP values).
@@ -226,16 +233,16 @@ its ORL code (Ahn, Haines & Zhang, 2017). I wrote and ran the code myself in RSt
 
 ## References
 
-- Ahn, W.-Y., Busemeyer, J. R., Wagenmakers, E.-J., & Stout, J. C. (2008). Comparison of decision learning models using the generalization criterion method. *Cognitive Science, 32*, 1376–1402.
-- Ahn, W.-Y., Haines, N., & Zhang, L. (2017). Revealing neurocomputational mechanisms of reinforcement learning and decision-making with the hBayesDM package. *Computational Psychiatry, 1*, 24–57.
-- Bechara, A., Damasio, A. R., Damasio, H., & Anderson, S. W. (1994). Insensitivity to future consequences following damage to human prefrontal cortex. *Cognition, 50*, 7–15.
-- Busemeyer, J. R., & Stout, J. C. (2002). A contribution of cognitive decision models to clinical assessment: Decomposing performance on the Bechara gambling task. *Psychological Assessment, 14*(3), 253–262.
-- Haines, N., Vassileva, J., & Ahn, W.-Y. (2018). The Outcome-Representation Learning model: A novel reinforcement learning model of the Iowa Gambling Task. *Cognitive Science, 42*, 2534–2561.
+- Ahn, W.-Y., Busemeyer, J. R., Wagenmakers, E.-J., & Stout, J. C. (2008). Comparison of decision learning models using the generalization criterion method. *Cognitive Science, 32*(8), 1376–1402. https://doi.org/10.1080/03640210802352992
+- Ahn, W.-Y., Haines, N., & Zhang, L. (2017). Revealing neurocomputational mechanisms of reinforcement learning and decision-making with the hBayesDM package. *Computational Psychiatry, 1*, 24–57. https://doi.org/10.1162/CPSY_a_00002
+- Bechara, A., Damasio, A. R., Damasio, H., & Anderson, S. W. (1994). Insensitivity to future consequences following damage to human prefrontal cortex. *Cognition, 50*(1–3), 7–15. https://doi.org/10.1016/0010-0277(94)90018-3
+- Busemeyer, J. R., & Stout, J. C. (2002). A contribution of cognitive decision models to clinical assessment: Decomposing performance on the Bechara gambling task. *Psychological Assessment, 14*(3), 253–262. https://doi.org/10.1037/1040-3590.14.3.253
+- Haines, N., Vassileva, J., & Ahn, W.-Y. (2018). The Outcome-Representation Learning model: A novel reinforcement learning model of the Iowa Gambling Task. *Cognitive Science, 42*(8), 2534–2561. https://doi.org/10.1111/cogs.12688
 - Haynes, J. M., Haines, N., Sullivan-Toole, H., & Olino, T. M. (2024). Test-retest reliability of the play-or-pass version of the Iowa Gambling Task. *Cognitive, Affective, & Behavioral Neuroscience, 24*(4), 740–754. https://doi.org/10.3758/s13415-024-01197-6
 - Horstmann, A., Villringer, A., & Neumann, J. (2012). Iowa Gambling Task: There is more to consider than long-term outcome. Using a linear equation model to disentangle the impact of outcome and frequency of gains and losses. *Frontiers in Neuroscience, 6*, 61. https://doi.org/10.3389/fnins.2012.00061
-- Steingroever, H., Wetzels, R., Horstmann, A., Neumann, J., & Wagenmakers, E.-J. (2013). Performance of healthy participants on the Iowa Gambling Task. *Psychological Assessment, 25*(1), 180–193.
+- Steingroever, H., Wetzels, R., Horstmann, A., Neumann, J., & Wagenmakers, E.-J. (2013). Performance of healthy participants on the Iowa Gambling Task. *Psychological Assessment, 25*(1), 180–193. https://doi.org/10.1037/a0029929
 - Steingroever, H., et al. (2015). Data from 617 healthy participants performing the Iowa Gambling Task: A "many labs" collaboration. *Journal of Open Psychology Data, 3*(1), e5. https://doi.org/10.5334/jopd.ak
-- Worthy, D. A., Pang, B., & Byrne, K. A. (2013). Decomposing the roles of perseveration and expected value representation in models of the Iowa Gambling Task. *Frontiers in Psychology, 4*, 640.
+- Worthy, D. A., Pang, B., & Byrne, K. A. (2013). Decomposing the roles of perseveration and expected value representation in models of the Iowa Gambling Task. *Frontiers in Psychology, 4*, 640. https://doi.org/10.3389/fpsyg.2013.00640
 
 ## License
 
