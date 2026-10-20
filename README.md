@@ -58,7 +58,7 @@ The data are **not** included in this repository. To run the code, download `IGT
 
 I used R's "optim" with the L-BFGS-B method, which allows bounds on each parameter, and ran it from 20 random starting points per participant (50 for VPP), keeping the best fit, because the likelihood surface can have local minima that trap a single search. VPP's iteration limit was raised to 1,000 because its fits were stopping before converging under the original 100. Lower bounds were set to 0.01 rather than 0 because at A = 0 & c = 0 the likelihood surface is flat, and the optimizer stopped there at chance-level fits. For reference, a participant choosing at random has an nll of 100 x ln 4 ≈ 138.63. The random seed was set at "2026" for ease of memory. As checks on the code, I confirmed that each likelihood returns 138.63 when its parameters make every choice equally likely, and that VPP never fit a participant worse than PVL-Delta (it can't, since w = 1 reproduces PVL-Delta exactly). Of the 486 best fits (162 participants × 3 models), 5 ended with optim's code 52 (the line search stopped without confirming convergence) rather than 0: 1 for PVL-Delta, 2 for VPP, and 2 for ORL.
 
-**Model Comparison:** I compared models with AIC = 2·nll + 2k and BIC = 2·nll + k·ln(n), where k = # of parameters (4 for PVL-Delta, 8 for VPP, 5 for ORL) and n = 100 trials per participant. Both start from how well the model fits (2·nll) and add a penalty for each parameter; (lower = better). Each was summed across participants, I also noted which model won for each participant under each criterion. I used two methods because BIC charges ~4.6 per parameter instead of 2, so it penalizes VPP's eight parameters more heavily. Reporting both tells me whether the ranking depends on that choice.
+**Model Comparison:** I compared models with AIC = 2·nll + 2k and BIC = 2·nll + k·ln(n), where k = number of parameters (4 for PVL-Delta, 8 for VPP, 5 for ORL) and n = 100 trials per participant. Both start from how well the model fits (2·nll) and add a penalty for each parameter; (lower = better). Each was summed across participants, I also noted which model won for each participant under each criterion. I used two methods because BIC charges ~4.6 per parameter instead of 2, so it penalizes VPP's eight parameters more heavily. Reporting both tells me whether the ranking depends on that choice.
 
 **Parameter Recovery:** Each participant's fitted parameters were called "true" values and used to simulate synthetic participants. Simulated outcomes were drawn at random from the outcomes actually observed for each deck. The synthetic data were refit with the same procedure. True & recovered values were compared with Pearson & Spearman correlations and counted how many estimates landed on a bound.
 
@@ -160,7 +160,7 @@ Overall, ORL is the best account of these choices: it wins on both total AIC and
 and most of its parameters recover well. But it misses win-stay/lose-shift, which VPP reproduces.
 A likely reason is that VPP’s perseveration depends on whether the last outcome was a gain or a loss,
 while ORL’s ignores outcomes. Testing that explanation, by adding outcome-dependent perseveration to ORL,
-is the planned extension below.
+is part of the planned extension below.
 
 ## Limitations
 
@@ -179,7 +179,7 @@ is the planned extension below.
 and it underpredicts how much participants stay after gains and switch after losses (win-stay, lose-shift).
 VPP, whose perseveration depends on whether the last outcome was a gain or a loss, comes much closer (see "Generative check").
 
-**Proposed variant:** What I want to work on next is an ORL variant that splits perseveration into separate traces after gains and after losses, each with its own weight (βP_win, βP_loss); it reduces to ORL when the two weights are equal (6 parameters vs. 5).
+**Proposed variant:** What I want to work on next is an ORL variant that splits perseveration into separate traces after gains and after losses, each with its own weight (βP_win, βP_loss); it would reduce to ORL when the two weights are equal (6 parameters vs. 5).
 
 **Predictions** (written before fitting):
 1. The variant beats ORL on summed AIC & BIC.
