@@ -181,6 +181,11 @@ VPP, whose perseveration depends on whether the last outcome was a gain or a los
 
 **Proposed variant:** What I want to work on next is an ORL variant that splits perseveration into separate traces after gains and after losses, each with its own weight (βP_win, βP_loss); it would reduce to ORL when the two weights are equal (6 parameters vs. 5).
 
+**Analysis details** (added Otober 24, 2026, before fitting the variant):
+- A net outcome of 0 counts as a gain, as in ORL & the WSLS definition.
+- The variant uses the same perseveration limits as ORL (+/-10 for βP_win and βP_loss), so any improvment comes from splitting perseveration by outcome rather than from wider limits. A sensitivity check with +/-30 for both models will follow.
+- For each participant, one of the variant's starting points will be that participant's ORL fit (with βP_win = βP_loss = βP), so the variant can never end up fitting worse than ORL because of an unlucky search.
+
 **Predictions** (written before fitting):
 1. The variant beats ORL on summed AIC & BIC.
 2. βP_win > βP_loss for most participants.
