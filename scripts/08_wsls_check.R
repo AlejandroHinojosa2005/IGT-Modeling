@@ -69,3 +69,22 @@ plot(wsls_obs, wsls_sim_vpp, xlim = lims, ylim = lims, pch = 16, col = rgb(0,0,0
 abline(0,1, lty =2)
 
 dev.off()
+
+# Paired t-test for ORL & VPP (t(161) = 7.2 & 1.06)
+t.test(wsls_obs, wsls_sim, paired = TRUE)
+mean(wsls_obs > wsls_sim, na.rm = TRUE)
+t.test(wsls_obs, wsls_sim_vpp, paired = TRUE)
+mean(wsls_obs > wsls_sim_vpp, na.rm = TRUE)
+
+
+
+
+
+
+
+
+
+
+
+
+

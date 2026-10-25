@@ -227,22 +227,42 @@ VPP, whose perseveration depends on whether the last outcome was a gain or a los
 
 **Proposed variant:** What I want to work on next is an ORL variant that splits perseveration into separate traces after gains and after losses, each with its own weight (βP_win, βP_loss); it would reduce to ORL when the two weights are equal (6 parameters vs. 5).
 
-**Analysis details** (added Otober 24, 2026, before fitting the variant):
+**Analysis details** (added October 24, 2026, before fitting the variant):
 - A net outcome of 0 counts as a gain, as in ORL & the WSLS definition.
-- The variant uses the same perseveration limits as ORL (+/-10 for βP_win and βP_loss), so any improvment comes from splitting perseveration by outcome rather than from wider limits. A sensitivity check with +/-30 for both models will follow.
-- For each participant, one of the variant's starting points will be that participant's ORL fit (with βP_win = βP_loss = βP), so the variant can never end up fitting worse than ORL because of an unlucky search.
+- The variant uses the same perseveration limits as ORL (+/-10 for βP_win and βP_loss),
+so any improvement comes from splitting perseveration by outcome rather than from wider limits.
+A sensitivity check with +/-30 for both models will follow.
+- For each participant, one of the variant's starting points will be that participant's ORL
+fit (with βP_win = βP_loss = βP), so the variant can never end up fitting worse than ORL because
+of an unlucky search.
+
+**Predictions** (written before fitting):
+1. The variant beats ORL on summed AIC & BIC.
+2. βP_win > βP_loss for most participants.
+3. It reproduces the observed win-stay, lose-shift.
+4. Its new parameters recover acceptably, call it r ≥ .6 between true and recovered βP_win − βP_loss,
+with the direction of the difference recovered for at least 75% of participants.
 
 **Results so far** (October 24, 2026; Horstmann sample only, held-out sample not yet fit):
 the variant fit better than ORL for 84 of 162 participants on AIC and 55 on BIC. Summed AIC
 favored the variant by 381; summed BIC favored ORL by 41. In model recovery, the variant won
 for 20% (AIC) and 3% (BIC) of ORL-generated participants, and 60% and 39% of variant-generated ones.
 Parameter recovery for the variant has not been run yet.
+- Update: item three in prediction check has been met. Simulated WSLS averaged 0.30 vs 0.30 observed
+(paired difference -0.001, 95% CI [-0.013, 0.012], t(161) = -0.11, p = .91; observed exceeded simulated for
+46% of participants), and correlated r = .94 with observed (thresholds: CI includes 0, r ≥ .77). ORL's gap was 0.085
 
-**Predictions** (written before fitting):
-1. The variant beats ORL on summed AIC & BIC.
-2. βP_win > βP_loss for most participants.
-3. It reproduces the observed win-stay, lose-shift.
-4. Its new parameters recover acceptably (otherwise prediction 2 can't be interpreted).
+**Exploratory** (not predicted): 
+- βP_loss was negative for 70% of participants and βP_win 52%. Beyond value learning,
+losses mostly add a push away from the chosen deck, while wins add no consistent pull either way.
+- The variant's A_pun correlated only .59 with ORL's for the same participants (βF .90, A_rew .81, K' .72), 
+lower than either model's recovery of A_pun, suggesting ORL's A_pun partly absorbs switching after losses.
+
+**Literature check**
+(October 25, 2026): I searched Google Scholar for papers citing Haines et al.
+(2018) that mention perseveration, outcome-dependence, or win-stay.
+None split ORL's perseveration by outcome. Outcome-dependent perseveration itself
+isn't new (VPP has it); however to my konwelge, no one has added it to ORL.Search not exhaustive.
 
 **Test sample:** The hypothesis came from the Horstmann data, so the confirmatory test uses
 a held-out study from the same pool with the same task: Steingroever et al.
@@ -276,6 +296,11 @@ R 4.6.1. Package versions are recorded with renv: open the project in RStudio an
 | `09_model_recovery.R` | Model recovery: simulates from each model, fits all three | ~80 min |
 | `09b_model_recovery_summary.R` | Summarizes model recovery (who wins, per person and summed) | seconds |
 | `10_orl_variant.R` | ORL variant: likelihood, simulator, and checks | seconds |
+| `11_fit_orl_wl.R` | Fits the ORL variant to all participants (one start at each person's ORL fit); refits the 3 that ended at the limits | ~30 min |
+| `12_model_recovery_wl.R` | Model recovery: simulates from ORL and the variant, fits both | ~45 min |
+| `12b_model_recovery_wl_summary.R` | Summarizes ORL-vs-variant model recovery | seconds |
+| `13_recovery_wl.R` | Parameter recovery for the ORL variant, including the win/loss split | ~20 min |
+| `14_wsls_wl.R` | Win-stay/lose-shift: observed vs. simulated from the fitted variant | seconds |
 
 *On an Apple silicon MacBook Air.
 

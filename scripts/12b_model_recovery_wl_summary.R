@@ -1,4 +1,4 @@
-# 12b_model_recovery_wl.R (09b copied and edited as needed)
+# 12b_model_recovery_wl_summary.R (09b copied and edited as needed)
 # Summarizes model recovery: which model wins when each model generated the data?
 
 results_mr <- readRDS("output/model_recovery_wl.rds")

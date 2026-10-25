@@ -36,6 +36,38 @@ for (i in bad) {
 saveRDS(results_orl_wl, "output/orl_wl_fit_horstmann.rds")
 
 
+# Checks & comparison with ORL and VPP
+all(results_orl_wl$nll <= orl$nll + 1e-8)   # never worse than ORL
+table(results_orl_wl$conv)
+
+vpp <- readRDS("output/vpp_fit_horstmann.rds")
+c(orl_aic = sum(2 * orl$nll + 10), wl_aic = sum(2 * results_orl_wl$nll + 12),
+  vpp_aic = sum(2 * vpp$nll + 16))
+c(orl_bic = sum(2 * orl$nll + 5 * log(100)), wl_bic = sum(2 * results_orl_wl$nll + 6 * log(100)),
+  vpp_bic = sum(2 * vpp$nll + 8 * log(100)))
+
+sum(orl$nll - results_orl_wl$nll > 1)              # variant wins vs. ORL, AIC
+sum(orl$nll - results_orl_wl$nll > log(100) / 2)   # variant wins vs. ORL, BIC
+sum(results_orl_wl$betaPw > results_orl_wl$betaPl) # prediction 2
+
+# Test ran that asked if weather spiting perspiration leaves ORL's other parameters unchanged
+# Shows that A_pun is absorbing the switching after losses
+p <- c("Arew", "Apun", "Kprime", "betaF")
+round(diag(cor(orl[, p], wl[, p])), 2)          # same people: does each parameter keep its ranking?
+round(colMeans(wl[, p]) - colMeans(orl[, p]), 2) # average shift
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
