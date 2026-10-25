@@ -232,6 +232,12 @@ VPP, whose perseveration depends on whether the last outcome was a gain or a los
 - The variant uses the same perseveration limits as ORL (+/-10 for βP_win and βP_loss), so any improvment comes from splitting perseveration by outcome rather than from wider limits. A sensitivity check with +/-30 for both models will follow.
 - For each participant, one of the variant's starting points will be that participant's ORL fit (with βP_win = βP_loss = βP), so the variant can never end up fitting worse than ORL because of an unlucky search.
 
+**Results so far** (October 24, 2026; Horstmann sample only, held-out sample not yet fit):
+the variant fit better than ORL for 84 of 162 participants on AIC and 55 on BIC. Summed AIC
+favored the variant by 381; summed BIC favored ORL by 41. In model recovery, the variant won
+for 20% (AIC) and 3% (BIC) of ORL-generated participants, and 60% and 39% of variant-generated ones.
+Parameter recovery for the variant has not been run yet.
+
 **Predictions** (written before fitting):
 1. The variant beats ORL on summed AIC & BIC.
 2. βP_win > βP_loss for most participants.
