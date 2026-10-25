@@ -115,9 +115,36 @@ sim_orl_wl <- function(par, deck_outcomes, n_trials = 100) {
   list(choice=choice,outcome=outcome)
 }
 
+# Copied fit ORL and made necessary adjustments as before
 
-
-
+fit_orl_wl <- function(choice, outcome, n_starts = 20, beta_lim = 10, start_par = NULL) {
+  lower <- c(0.01, 0.01, 0, -beta_lim, -beta_lim, -beta_lim)
+  upper <- c(1, 1, 5, beta_lim, beta_lim, beta_lim)
+  best_value <- Inf
+  
+  for  (s in 1:n_starts) {
+    if (s == 1 && !is.null(start_par)) {
+      start <- start_par
+    } else {
+      start <- runif(6, min=lower, max=upper)
+    }
+    fit <- optim(
+      par = start,
+      fn = orl_wl_nll,
+      choice = choice,
+      outcome = outcome,
+      method = "L-BFGS-B",
+      lower = lower,
+      upper = upper,
+      control = list(maxit = 1000)
+    )
+    if (fit$value < best_value) {
+      best_value <- fit$value
+      best_fit <- fit
+    }
+  }
+  best_fit
+}
 
 
 
