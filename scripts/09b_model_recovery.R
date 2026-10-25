@@ -19,5 +19,5 @@ table(generated = results_mr$gen, won_BIC = bic_win)
 round(prop.table(table(results_mr$gen, aic_win), 1), 2)
 round(prop.table(table(results_mr$gen, bic_win), 1), 2)
 
-# Summed scores for each generating model (how your real comparison was done)
+# Summed scores for each generating model
 aggregate(results_mr[, c(aic_cols, bic_cols)], by = list(generated = results_mr$gen), FUN = sum)
