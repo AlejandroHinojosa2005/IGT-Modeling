@@ -55,6 +55,72 @@ orl_wl_nll <- function(par, choice, outcome) {
   -ll
 }
 
+orl_fit <- readRDS("output/orl_fit_horstmann.rds")
+orl_p <- as.matrix(orl_fit[, c("Arew", "Apun", "Kprime", "betaF", "betaP")])
+
+d <- sapply(1:162, function(i)
+  orl_nll(orl_p[i, ], choice_h[i, ], net_h[i, ]) -
+    orl_wl_nll(c(orl_p[i, ], orl_p[i, 5]), choice_h[i, ], net_h[i, ]))
+max(abs(d))
+
+
+# Sim_ORL copyed from script 04_orl.R
+# Same changes made as in orl_nll above
+
+sim_orl_wl <- function(par, deck_outcomes, n_trials = 100) {
+  Arew <- par[1]
+  Apun <- par[2]
+  Kprime <- par[3]
+  betaF <- par[4]
+  betaPw <- par[5]
+  betaPl <- par[6]
+  
+  K <- 3^Kprime - 1
+  Ev <- c(0, 0, 0, 0)
+  EF <- c(0, 0, 0, 0)
+  PSw <- c(0, 0, 0, 0) 
+  PSl <- c(0, 0, 0, 0)
+  choice <- rep(NA, n_trials)
+  outcome <- rep(NA, n_trials)
+  
+  for (t in 1:n_trials) {
+    # combined value (Eq. 12) -> choice probabilities (softmax, theta=1)
+    V <- Ev + EF * betaF + PSw * betaPw + PSl * betaPl
+    p <- exp(V - max(V)) / sum(exp(V - max(V)))
+    j <- sample(1:4, size = 1, prob=p)
+    choice[t] <- j
+    outcome[t] <- sample(deck_outcomes[[j]], size = 1)
+    
+    # learning: identical to orl_nll steps 4-8
+    x <- outcome[t] / 100
+    sgn <- sign(x)
+    if (x >= 0) {
+      a_chosen <- Arew
+      a_unchosen <- Apun
+    } else {
+      a_chosen <- Apun
+      a_unchosen <- Arew
+    }
+    Ev[j] <- Ev[j] + a_chosen * (x - Ev[j])
+    EF[j] <- EF[j] + a_chosen * (sgn - EF[j])
+    EF[-j] <- EF[-j] + a_unchosen * (-sgn / 3 - EF[-j])
+    PSw <- PSw / (1 + K) 
+    PSl <- PSl / (1 + K) 
+    if (x >= 0) {
+      PSw[j] <- 1 / (1 + K); PSl[j] <- 0
+    } else {
+      PSl[j] <- 1 / (1 + K); PSw[j] <- 0
+    }
+  }
+  list(choice=choice,outcome=outcome)
+}
+
+
+
+
+
+
+
 
 
 

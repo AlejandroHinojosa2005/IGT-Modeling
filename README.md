@@ -54,25 +54,64 @@ The data are **not** included in this repository. To run the code, download `IGT
 
 ## Methods
 
-**Model Fitting:** I fit each model separately to each participant by maximum likelihood. For a given set of parameters, the model assigns a probability (via softmax) to the deck the participant chose on each trial; the likelihood is the product of those 100 probabilities, then I searched for the parameters that made the observed sequence of choices most probable. This was done by summing the log-probabilities instead of multiplying the probabilities. This was done because a product of 100 small numbers shrinks toward 0, and minimized the negative of that sum (the negative log-likelihood (nll)). The log-softmax was computed by subtracting the largest value before exponentiating, that way large values don't overflow.
+**Model Fitting:** I fit each model separately to each participant by maximum likelihood.
+For a given set of parameters, the model assigns a probability (via softmax)
+to the deck the participant chose on each trial; the likelihood is the product
+of those 100 probabilities, then I searched for the parameters that made the observed
+nce of choices most probable. This was done by summing the log-probabilities instead of
+multiplying the probabilities. This was done because a product of 100 small numbers shrinks
+toward 0, and minimized the negative of that sum (the negative log-likelihood (nll)).
+The log-softmax was computed by subtracting the largest value before exponentiating,
+that way large values don't overflow.
 
 I used R's "optim" with the L-BFGS-B method, which allows bounds on each parameter, and ran it from 20 random starting points per participant (50 for VPP), keeping the best fit, because the likelihood surface can have local minima that trap a single search. VPP's iteration limit was raised to 1,000 because its fits were stopping before converging under the original 100. Lower bounds were set to 0.01 rather than 0 because at A = 0 & c = 0 the likelihood surface is flat, and the optimizer stopped there at chance-level fits. For reference, a participant choosing at random has an nll of 100 x ln 4 ≈ 138.63. The random seed was set at "2026" for ease of memory. As checks on the code, I confirmed that each likelihood returns 138.63 when its parameters make every choice equally likely, and that VPP never fit a participant worse than PVL-Delta (it can't, since w = 1 reproduces PVL-Delta exactly). Of the 486 best fits (162 participants × 3 models), 5 ended with optim's code 52 (the line search stopped without confirming convergence) rather than 0: 1 for PVL-Delta, 2 for VPP, and 2 for ORL.
 
-**Model Comparison:** I compared models with AIC = 2·nll + 2k and BIC = 2·nll + k·ln(n), where k = number of parameters (4 for PVL-Delta, 8 for VPP, 5 for ORL) and n = 100 trials per participant. Both start from how well the model fits (2·nll) and add a penalty for each parameter; (lower = better). Each was summed across participants, I also noted which model won for each participant under each criterion. I used two methods because BIC charges ~4.6 per parameter instead of 2, so it penalizes VPP's eight parameters more heavily. Reporting both tells me whether the ranking depends on that choice.
+**Model Comparison:** I compared models with AIC = 2·nll + 2k and BIC = 2·nll + k·ln(n),
+where k = number of parameters (4 for PVL-Delta, 8 for VPP, 5 for ORL) and n = 100 trials
+per participant. Both start from how well the model fits (2·nll) and add a penalty for each
+parameter; (lower = better). Each was summed across participants, I also noted which model
+won for each participant under each criterion. I used two methods because BIC charges ~4.6
+per parameter instead of 2, so it penalizes VPP's eight parameters more heavily. Reporting
+both tells me whether the ranking depends on that choice.
 
-**Parameter Recovery:** Each participant's fitted parameters were called "true" values and used to simulate synthetic participants. Simulated outcomes were drawn at random from the outcomes actually observed for each deck. The synthetic data were refit with the same procedure. True & recovered values were compared with Pearson & Spearman correlations and counted how many estimates landed on a bound.
+**Parameter Recovery:** Each participant's fitted parameters were called "true" values
+and used to simulate synthetic participants. Simulated outcomes were drawn at random
+from the outcomes actually observed for each deck. The synthetic data were refit with
+the same procedure. True & recovered values were compared with Pearson & Spearman
+correlations and counted how many estimates landed on a bound.
 
-**Bound Sensitivity Checks:** Participants whose perseveration estimates landed on a "bound" (limit) were refit with wider bounds (ORL βP: ±10 → ±30; VPP ε_P and ε_N: ±5 → ±15). I compared their nll before and after and checked whether the model ranking changed, to see whether the bounds I chose for the perseveration parameters were constraining the fits.
+**Model Recovery:** To check wherther the comparison can tell the models apart,
+I simulated one synthetic participant per real participant from each model
+(using that participant's fitted parameters with outcomes drawn as in parameter
+recovery), then fit the three models to the simulated datasets with the same
+procedure, and recorded which model AIC & BIC picked, per participant then summed
+(486 datasets).
 
-**Generative Check:** A model can fit choices well overall and still fail to reproduce a specific behavior, so I checked whether ORL & VPP reproduce win-stay/lose-shift (WSLS), defined as P(stay after gain) - P(stay after loss), with outcomes of 0 counted as gains. For each participant, I simulated 20 datasets from their fitted parameters, computed WSLS for each, and averaged them. I compared observed and simulated WSLS across participants with a correlation and a paired t-test.
+**Bound Sensitivity Checks:** Participants whose perseveration estimates landed
+on a "bound" (limit) were refit with wider bounds (ORL βP: ±10 → ±30; VPP ε_P and ε_N: ±5 → ±15).
+I compared their nll before and after and checked whether the model ranking changed, to see whether
+the bounds I chose for the perseveration parameters were constraining the fits.
 
-**Software:** R 4.6.1 (in RStudio) was used for all analyses, with optim from R's built-in stats package, and renv to record package versions so the analysis can be rerun with the same setup. The code for each step is in "scripts/", numbered in the order the scripts run.
+**Generative Check:** A model can fit choices well overall and still fail to reproduce
+a specific behavior, so I checked whether ORL & VPP reproduce win-stay/lose-shift (WSLS),
+defined as P(stay after gain) - P(stay after loss), with outcomes of 0 counted as gains.
+For each participant, I simulated 20 datasets from their fitted parameters, computed WSLS
+for each, and averaged them. I compared observed and simulated WSLS across participants with
+a correlation and a paired t-test.
+
+**Software:** R 4.6.1 (in RStudio) was used for all analyses, with optim from R's built-in stats package,
+and renv to record package versions so the analysis can be rerun with the same setup. The code for each step
+is in "scripts/", numbered in the order the scripts run.
 
 ## Results
 
 ### Behavior
 
-Across all 100 trials, participants chose deck A on 14.5% of trials, B on 34.8%, C on 20.1%, and D on 30.5%. The winning decks (C & D) received only about half of all choices (50.6%), while the two decks that rarely produce a loss (B & D) received about two thirds (65.3%); deck B, a losing deck, was chosen most often. Observed win-stay/lose-shift averaged 0.30 (median 0.26).
+Across all 100 trials, participants chose deck A on 14.5% of trials, B on 34.8%,
+C on 20.1%, and D on 30.5%. The winning decks (C & D) received only about half of
+all choices (50.6%), while the two decks that rarely produce a loss (B & D) received
+about two thirds (65.3%); deck B, a losing deck, was chosen most often. Observed
+win-stay/lose-shift averaged 0.30 (median 0.26).
 
 ### Model comparison
 
@@ -85,8 +124,7 @@ Across all 100 trials, participants chose deck A on 14.5% of trials, B on 34.8%,
 | Best model, by participant (AIC) | 14 | 64 | 84 |
 | Best model, by participant (BIC) | 33 | 18 | 111 |
 
-ORL fit best on both criteria: BIC was decisive (a gap of 1,357 over VPP),
-while AIC’s gap was much smaller (91, about 0.6 per participant). 
+ORL fit best on both criteria: BIC favored it by 1,357 (through model recovery shows BIC leans toward ORL over VPP; see Model recovery), while AIC's gap was much smaller (91, about .6 per participant). 
 VPP actually fits the choices better in raw terms (summed nll 440.7 lower than ORL’s),
 but not by enough to justify its three extra parameters.
 PVL-Delta was worst on both. One last observation: 
@@ -123,6 +161,14 @@ VPP’s extra parameters made the parameters it shares with PVL-Delta (A, α, c,
 likely because w trades off with c and A. As seen on the recovery plots,
 many estimates sit at a bound (e.g., 87 of 162 VPP λ values and 65 ORL βP values).
 For participants at the limit, βP recovers its sign better than its size.
+
+### Model Recovery
+
+Summed across participants, AIC picked the generating model in all three cases, but BIC picked ORL even when VPP generated the data (230).
+Per participant, ORL is recovered well by both criteria (.88 & .89), while VPP is recovered for 64% of simulated participants under AIC but
+only 22% under BIC. BIC's margin for ORL on the real data therefore partly reflects its penalty on VPP's extra parameters, and AIC is the
+more reliable criterion for comparing there two models. Under AIC, the real data's 64 VPP wins are far more than the roughly 10 expected if
+everyone behaved like ORL, which suggests some participants show VPP-like behavior that ORL misses.
 
 ### Sensitivity to parameter limits
 
@@ -169,7 +215,7 @@ is part of the planned extension below.
 3. I only refit perseveration parameters with wider limits, there were cases (e.g., VPP λ and A) that were not rechecked.
 4. The simulator function used draws outcomes at random from each deck rather than using the task's actual card sequence.
 5. AIC & BIC count parameters rather than assessing the model's actual flexibility.
-6. No model recovery was assessed (simulating data from each model and checking whether AIC & BIC pick the model that generated it), so I can't yet confirm the comparison can tell these models apart.
+6. Model recovery used one simulated dataset per participant, and BIC could not reliably recover VPP, so BIC-based conclusions about VPP should be read cautiosly.
 7. I used one dataset of healthy adults, so the results may not hold for clinical groups or other payoff schemes.
 
 ## Planned extension: outcome-dependent perseveration in ORL
@@ -201,7 +247,7 @@ since the discovery data had already been analyzed.
 
 ## Next steps
 
-- Model recovery for the three models
+- Model recovery between ORL and the variant (can AIC/BIC detect a one-parameter difference?)
 - Hierarchical Bayesian fits with hBayesDM as a cross-check, with LOOIC
 - The extension above
 - I'm also planning on comparing it against newer models.
@@ -221,6 +267,9 @@ R 4.6.1. Package versions are recorded with renv: open the project in RStudio an
 | `06_recovery.R` | Parameter recovery for all three models | ~30 min |
 | `07_model_comparison.R` | AIC/BIC model comparison | seconds |
 | `08_wsls_check.R` | Win-stay/lose-shift: observed vs. simulated from fitted models | ~1 min |
+| `09_model_recovery.R` | Model recovery: simulates from each model, fits all three | ~80 min |
+| `09b_model_recovery_summary.R` | Summarizes model recovery (who wins, per person and summed) | seconds |
+| `10_orl_variant.R` | ORL variant: likelihood, simulator, and checks | seconds |
 
 *On an Apple silicon MacBook Air.
 
