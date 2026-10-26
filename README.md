@@ -5,18 +5,23 @@ I implemented three reinforcement-learning models of the Iowa Gambling Task
 to 162 healthy adults by maximum likelihood. I then compared the models
 (AIC/BIC), ran parameter recovery, and checked whether each model could
 reproduce participants’ win-stay/lose-shift behavior. ORL fit best overall,
-but it under-produced win-stay/lose-shift, which VPP reproduced. Next,
-I plan to test an ORL variant whose perseveration depends on whether the
-last outcome was a gain or a loss.
+but it under-produced win-stay/lose-shift, which VPP reproduced. I then built
+an ORL variant whose perseveration depends on whether the last outcome was gain
+or loss. On the same data, it beat ORL on summed AIC (not BIC), reproduced win-stay/lose-shift,
+and its new parameters recovered well. A test on a held-out sample is next.
 
 **Status:** Personal learning project, October 2026.
 
 ## What's in this repository
 
-- Implementations of three reinforcement-learning models of the IGT (PVL-Delta, VPP, ORL), each with a likelihood function, a simulator, and a multi-start maximum-likelihood fitting routine
+- Implementations of three reinforcement-learning models of the IGT (PVL-Delta, VPP, ORL),
+each with a likelihood function, a simulator, and a multi-start maximum-likelihood fitting routine
 - Fits to 162 healthy adults from a public data pool
 - Parameter recovery for all three models
-- Model comparison (AIC/BIC), sensitivity checks on parameter limits, and a generative check of win-stay/lose-shift behavior
+- Model comparison (AIC/BIC), sensitivity checks on parameter limits, and a generative check of
+win-stay/lose-shift behavior
+- An ORL variant with outcome-dependent perseveration: fits, model recovery against ORL,
+parameter recovery, and win-stay/lose-shift check
 
 ## Background
 
@@ -28,11 +33,40 @@ Summary scores like the net score (C+D-A-B) can't tell apart people who reach th
 
 ## Models
 
-**Prospect Valence Learning With The Delta Rule (PVL-Delta)** (Ahn et al., 2008): It assumes people feel outcomes through a prospect-utility function (α: how sensitivity changes with outcome size; below 1, each extra dollar counts for less; λ: how much losses count relative to gains), update the chosen deck's expected value (EV) toward each felt outcome at learning rate A, & choose decks through a softmax whose consistency c sets how strictly choices follow value. Four parameters: A, α, λ, c.
+**Prospect Valence Learning With The Delta Rule (PVL-Delta)** (Ahn et al., 2008):
+It assumes people feel outcomes through a prospect-utility function (α: how sensitivity
+changes with outcome size; below 1, each extra dollar counts for less; λ: how much losses count
+relative to gains), update the chosen deck's expected value (EV) toward each felt outcome at
+learning rate A, & choose decks through a softmax whose consistency c sets how strictly choices
+follow value. Four parameters: A, α, λ, c.
 
-**Value-Plus-Perseveration (VPP)** (Worthy, Pang & Byrne, 2013): Separates the tendency to repeat recent choices from the tendency to choose high-value decks. It keeps PVL-Delta's utility function, learning rule, and softmax, and adds a second quantity for each deck: "perseveration", a pull toward or away from recently chosen decks that depends on which deck was chosen & whether the outcome was a gain or a loss, not on the outcome's size. Every deck's perseveration fades (decays) over trials at some rate K (near 1: a long memory of past choices; near 0: only the last choice matters), & the chosen deck's perseveration is boosted after gains (ε_P) or losses (ε_N). Either boost can be negative, pushing toward a switch, so ε_P > 0 with ε_N < 0 is win-stay, lose-shift. VPP then combines EV and perseveration into one value signal that replaces EV in the softmax. This adds a parameter w, which sets the weight given to each: at w = 1, VPP is exactly PVL-Delta, & at w = 0, choices follow perseveration alone. The model increases parameter count to eight: A, α, λ, c, K, ε_P, ε_N, w.
+**Value-Plus-Perseveration (VPP)** (Worthy, Pang & Byrne, 2013):
+Separates the tendency to repeat recent choices from the tendency to choose high-value decks.
+It keeps PVL-Delta's utility function, learning rule, and softmax, and adds a second quantity
+for each deck: "perseveration", a pull toward or away from recently chosen decks that depends
+on which deck was chosen & whether the outcome was a gain or a loss, not on the outcome's size.
+Every deck's perseveration fades (decays) over trials at some rate K (near 1: a long memory of
+past choices; near 0: only the last choice matters), & the chosen deck's perseveration is boosted
+after gains (ε_P) or losses (ε_N). Either boost can be negative, pushing toward a switch, so ε_P > 0
+with ε_N < 0 is win-stay, lose-shift. VPP then combines EV and perseveration into one value signal
+that replaces EV in the softmax. This adds a parameter w, which sets the weight given to each:
+at w = 1, VPP is exactly PVL-Delta, & at w = 0, choices follow perseveration alone. The model increases
+parameter count to eight: A, α, λ, c, K, ε_P, ε_N, w.
 
-**Outcome-Representation Learning (ORL)** (Haines, Vassileva & Ahn, 2018): ORL starts clean, keeping only the delta rule, softmax & a modified version of perseveration. ORL introduces sensitivity to win frequency (how often a deck pays off) and distinguishes it from how much a deck pays (e.g., deck B, a losing deck, is often picked as much as the winning decks because it rarely produces a loss). ORL learns expected value (EV) directly from the objective outcome, with one learning rate after gains (A_rew) and another after losses (A_pun). Alongside EV, ORL learns each deck's expected frequency (EF) from the outcome's sign alone (+1 for a gain, −1 for a loss), ignoring size. EF also gets a fictive update for the unchosen decks: if the chosen deck won, ORL assumes the others probably would have lost, & vice versa. Unlike VPP's, ORL's perseveration ignores outcomes: every deck's pull fades each trial by K, & the chosen deck is reset to the same value whether it won or lost. Finally, expected value, win frequency, & perseveration are added into one value signal, where two new parameters, βF and βP set how much frequency and perseveration count. This goes into a softmax with no consistency parameter (θ fixed at 1), so βF and βP are measured relative to expected value. It cuts the parameter count to five: A_rew, A_pun, K, βF, βP.
+**Outcome-Representation Learning (ORL)** (Haines, Vassileva & Ahn, 2018):
+ORL starts clean, keeping only the delta rule, softmax & a modified version of perseveration.
+ORL introduces sensitivity to win frequency (how often a deck pays off) and distinguishes it
+from how much a deck pays (e.g., deck B, a losing deck, is often picked as much as the winning
+decks because it rarely produces a loss). ORL learns expected value (EV) directly from the objective
+outcome, with one learning rate after gains (A_rew) and another after losses (A_pun). Alongside EV,
+ORL learns each deck's expected frequency (EF) from the outcome's sign alone (+1 for a gain, −1 for a loss),
+ignoring size. EF also gets a fictive update for the unchosen decks: if the chosen deck won, ORL assumes
+the others probably would have lost, & vice versa. Unlike VPP's, ORL's perseveration ignores outcomes:
+every deck's pull fades each trial by K, & the chosen deck is reset to the same value whether it won or
+lost. Finally, expected value, win frequency, & perseveration are added into one value signal, where two
+new parameters, βF and βP set how much frequency and perseveration count. This goes into a softmax with
+no consistency parameter (θ fixed at 1), so βF and βP are measured relative to expected value. It cuts
+the parameter count to five: A_rew, A_pun, K, βF, βP.
 
 | Model | Parameters (range used) | Source |
 |---|---|---|
@@ -41,10 +75,13 @@ Summary scores like the net score (C+D-A-B) can't tell apart people who reach th
 | ORL | A_rew, A_pun (0.01–1), K′ (0–5), βF, βP (−10 to 10) | Haines, Vassileva & Ahn (2018) |
 
 Implementation notes:
-- Equations follow Haines et al. (2018). My ORL code was written from the published equations and checked against the hBayesDM Stan implementation (`igt_orl.stan`); no code was copied.
+- Equations follow Haines et al. (2018). My ORL code was written from the published equations and
+checked against the hBayesDM Stan implementation (`igt_orl.stan`); no code was copied.
 - Outcomes are divided by 100 (hBayesDM's default scale), so estimates are comparable to hBayesDM's.
-- The papers leave VPP's ε and ORL's β parameters unbounded; the limits above are my choice (see "Sensitivity to parameter limits").
-- ORL's decay K is fitted on a transformed scale, K′, with K = 3^K′ − 1 (following hBayesDM); K′ is what the tables and figures report.
+- The papers leave VPP's ε and ORL's β parameters unbounded; the limits above are my choice
+(see "Sensitivity to parameter limits").
+- ORL's decay K is fitted on a transformed scale, K′, with K = 3^K′ − 1 (following hBayesDM);
+K′ is what the tables and figures report.
 
 ## Data
 
@@ -248,9 +285,17 @@ the variant fit better than ORL for 84 of 162 participants on AIC and 55 on BIC.
 favored the variant by 381; summed BIC favored ORL by 41. In model recovery, the variant won
 for 20% (AIC) and 3% (BIC) of ORL-generated participants, and 60% and 39% of variant-generated ones.
 Parameter recovery for the variant has not been run yet.
-- Update: item three in prediction check has been met. Simulated WSLS averaged 0.30 vs 0.30 observed
-(paired difference -0.001, 95% CI [-0.013, 0.012], t(161) = -0.11, p = .91; observed exceeded simulated for
-46% of participants), and correlated r = .94 with observed (thresholds: CI includes 0, r ≥ .77). ORL's gap was 0.085
+
+Prediction check (October 25, 2026; Horstmann sample only):
+1. Partly supported: summed AIC favored the variant (by 381), summed BIC favored ORL (41).
+2. Supported: βP_win > βP_loss for 121 of 162 participants (75%). In parameter recovery,
+the share of positive differences was the same in true and recovered values (74.7% vs. 74.1%),
+so the fitting dosen't produceit.
+3. Met: simulated WSLS averaged 0.30 vs. 0.30 observed (paired difference −0.001, 95% CI
+[−0.013, 0.012], t(161) = −0.11, p = .91; observed exceeded simulated for 46%), r = .94
+with observed (thresholds: CI includes 0, r ≥ .77). ORL’s gap was 0.085.
+4. Met: βP_win − βP_loss recovered at r = .75 (Spearman .82), with direction correct for 83%
+(thresholds: r ≥ .6, 75%). Individual parameters recovered at .65-.90
 
 **Exploratory** (not predicted): 
 - βP_loss was negative for 70% of participants and βP_win 52%. Beyond value learning,
@@ -258,8 +303,8 @@ losses mostly add a push away from the chosen deck, while wins add no consistent
 - The variant's A_pun correlated only .59 with ORL's for the same participants (βF .90, A_rew .81, K' .72), 
 lower than either model's recovery of A_pun, suggesting ORL's A_pun partly absorbs switching after losses.
 
-**Literature check**
-(October 25, 2026): I searched Google Scholar for papers citing Haines et al.
+**Literature check** (October 25, 2026):
+I searched Google Scholar for papers citing Haines et al.
 (2018) that mention perseveration, outcome-dependence, or win-stay.
 None split ORL's perseveration by outcome. Outcome-dependent perseveration itself
 isn't new (VPP has it); however to my konwelge, no one has added it to ORL.Search not exhaustive.
