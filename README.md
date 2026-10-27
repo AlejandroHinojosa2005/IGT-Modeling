@@ -25,11 +25,29 @@ parameter recovery, and win-stay/lose-shift check
 
 ## Background
 
-Back in 1994, Bechara et al. wanted to figure out a way to assess decision making deficits in people with ventromedial prefrontal damage who despite normal intelligence, displayed poor decision making. To do this they developed The Iowa Gambling Task. The scheme goes as follows:
+Back in 1994, Bechara et al. wanted to figure out a way to assess decision making
+deficits in people with ventromedial prefrontal damage who despite normal intelligence,
+displayed poor decision making. To do this they developed The Iowa Gambling Task.
+The scheme goes as follows:
 
-The participant would be given $2000 of facsimile money. They would then be shown four decks of cards; they choose one deck and pick one card from said deck at a time. Each card gives a reward (rew), with some also carrying a loss/punishment (pun). Their instructions are to make as much money as possible while not being told deck properties. Over every ten cards, decks A & B both have a -250 expected outcome (losing decks), while decks C & D have expected outcome of +250 (winning decks). The paired decks varied in both how often pun was doled out & how much any given pun is worth. For losing decks, rew was fixed at +100 while pun varied between -150 to -350 for deck A and was fixed at -1250 for deck B. For winning decks, rew was fixed at +50 while pun varied between -25 to -75 for deck C and was fixed at -250 for deck D. Every card has a rew, but decks A & C carry a pun on 5 of every 10 cards, while B & D carry one on only 1 of every 10. Participants are assessed on ability to favor winning decks over the losing ones.
+The participant would be given $2000 of facsimile money. They would then be shown four
+decks of cards; they choose one deck and pick one card from said deck at a time. Each
+card gives a reward (rew), with some also carrying a loss/punishment (pun). Their
+instructions are to make as much money as possible while not being told deck properties.
+Over every ten cards, decks A & B both have a -250 expected outcome (losing decks),
+while decks C & D have expected outcome of +250 (winning decks). The paired decks varied
+in both how often pun was doled out & how much any given pun is worth. For losing decks,
+rew was fixed at +100 while pun varied between -150 to -350 for deck A and was fixed at
+-1250 for deck B. For winning decks, rew was fixed at +50 while pun varied between -25
+to -75 for deck C and was fixed at -250 for deck D. Every card has a rew, but decks A & C
+carry a pun on 5 of every 10 cards, while B & D carry one on only 1 of every 10. Participants
+are assessed on ability to favor winning decks over the losing ones.
 
-Summary scores like the net score (C+D-A-B) can't tell apart people who reach the same score through different means, e.g. faster vs. slower learning or more versus less consistent choosing. To address this, computational modeling is used. These models assume that following each trial, participants update their expectations about the decks. The models I coded build on the Expectancy Valence model (Busemeyer & Stout, 2002) and Prospect Valence Learning (PVL; Ahn et al., 2008).
+Summary scores like the net score (C+D-A-B) can't tell apart people who reach the same score
+through different means, e.g. faster vs. slower learning or more versus less consistent choosing.
+To address this, computational modeling is used. These models assume that following each trial,
+participants update their expectations about the decks. The models I coded build on the Expectancy
+Valence model (Busemeyer & Stout, 2002) and Prospect Valence Learning (PVL; Ahn et al., 2008).
 
 ## Models
 
@@ -85,9 +103,16 @@ K′ is what the tables and figures report.
 
 ## Data
 
-Studies use different trial lengths & payoff schemes. I used the Horstmann dataset from Steingroever et al.'s (2015) "many labs" data pool (https://osf.io/8t7rm, CC BY-SA 4.0): 162 healthy participants, 100 trials each. These data were first published in Steingroever et al. (2013), and a subset appears in Horstmann, Villringer & Neumann (2012). Its payoffs match the original except for deck C, whose pun is always -50 rather than varying between -25 & -75, so the expected outcomes stay the same; the card order is also randomly shuffled rather than fixed (payoff scheme 2 in the data paper). For every trial, the chosen deck and net outcome was given, as (gain + loss, with loss stored as negative numbers).
+Studies use different trial lengths & payoff schemes. I used the Horstmann dataset
+from Steingroever et al.'s (2015) "many labs" data pool (https://osf.io/8t7rm, CC BY-SA 4.0):
+162 healthy participants, 100 trials each. These data were first published in Steingroever et al. (2013),
+and a subset appears in Horstmann, Villringer & Neumann (2012). Its payoffs match the original except for
+deck C, whose pun is always -50 rather than varying between -25 & -75, so the expected outcomes stay the
+same; the card order is also randomly shuffled rather than fixed (payoff scheme 2 in the data paper).
+For every trial, the chosen deck and net outcome was given, as (gain + loss, with loss stored as negative numbers).
 
-The data are **not** included in this repository. To run the code, download `IGTdata.rdata` from OSF and place it in a folder named `data-raw/` in the project root.
+The data are **not** included in this repository. To run the code, download
+`IGTdata.rdata` from OSF and place it in a folder named `data-raw/` in the project root.
 
 ## Methods
 
@@ -101,7 +126,18 @@ toward 0, and minimized the negative of that sum (the negative log-likelihood (n
 The log-softmax was computed by subtracting the largest value before exponentiating,
 that way large values don't overflow.
 
-I used R's "optim" with the L-BFGS-B method, which allows bounds on each parameter, and ran it from 20 random starting points per participant (50 for VPP), keeping the best fit, because the likelihood surface can have local minima that trap a single search. VPP's iteration limit was raised to 1,000 because its fits were stopping before converging under the original 100. Lower bounds were set to 0.01 rather than 0 because at A = 0 & c = 0 the likelihood surface is flat, and the optimizer stopped there at chance-level fits. For reference, a participant choosing at random has an nll of 100 x ln 4 ≈ 138.63. The random seed was set at "2026" for ease of memory. As checks on the code, I confirmed that each likelihood returns 138.63 when its parameters make every choice equally likely, and that VPP never fit a participant worse than PVL-Delta (it can't, since w = 1 reproduces PVL-Delta exactly). Of the 486 best fits (162 participants × 3 models), 5 ended with optim's code 52 (the line search stopped without confirming convergence) rather than 0: 1 for PVL-Delta, 2 for VPP, and 2 for ORL.
+I used R's "optim" with the L-BFGS-B method, which allows bounds on each parameter,
+and ran it from 20 random starting points per participant (50 for VPP), keeping the best
+fit, because the likelihood surface can have local minima that trap a single search. VPP's
+iteration limit was raised to 1,000 because its fits were stopping before converging under
+the original 100. Lower bounds were set to 0.01 rather than 0 because at A = 0 & c = 0 the
+likelihood surface is flat, and the optimizer stopped there at chance-level fits. For reference,
+a participant choosing at random has an nll of 100 x ln 4 ≈ 138.63. The random seed was set at
+"2026" for ease of memory. As checks on the code, I confirmed that each likelihood returns 138.63
+when its parameters make every choice equally likely, and that VPP never fit a participant worse
+than PVL-Delta (it can't, since w = 1 reproduces PVL-Delta exactly). Of the 486 best fits
+(162 participants × 3 models), 5 ended with optim's code 52 (the line search stopped without confirming
+convergence) rather than 0: 1 for PVL-Delta, 2 for VPP, and 2 for ORL.
 
 **Model Comparison:** I compared models with AIC = 2·nll + 2k and BIC = 2·nll + k·ln(n),
 where k = number of parameters (4 for PVL-Delta, 8 for VPP, 5 for ORL) and n = 100 trials
@@ -161,7 +197,9 @@ win-stay/lose-shift averaged 0.30 (median 0.26).
 | Best model, by participant (AIC) | 14 | 64 | 84 |
 | Best model, by participant (BIC) | 33 | 18 | 111 |
 
-ORL fit best on both criteria: BIC favored it by 1,357 (through model recovery shows BIC leans toward ORL over VPP; see Model recovery), while AIC's gap was much smaller (91, about .6 per participant). 
+ORL fit best on both criteria: BIC favored it by 1,357 (through model recovery shows BIC
+leans toward ORL over VPP; see Model recovery), while AIC's gap was much smaller
+(91, about .6 per participant). 
 VPP actually fits the choices better in raw terms (summed nll 440.7 lower than ORL’s),
 but not by enough to justify its three extra parameters.
 PVL-Delta was worst on both. One last observation: 
@@ -201,10 +239,12 @@ For participants at the limit, βP recovers its sign better than its size.
 
 ### Model Recovery
 
-Summed across participants, AIC picked the generating model in all three cases, but BIC picked ORL even when VPP generated the data (230).
-Per participant, ORL is recovered well by both criteria (.88 & .89), while VPP is recovered for 64% of simulated participants under AIC but
-only 22% under BIC. BIC's margin for ORL on the real data therefore partly reflects its penalty on VPP's extra parameters, and AIC is the
-more reliable criterion for comparing there two models. Under AIC, the real data's 64 VPP wins are far more than the roughly 10 expected if
+Summed across participants, AIC picked the generating model in all three cases, but BIC picked ORL
+even when VPP generated the data (230). Per participant, ORL is recovered well by both criteria
+(.88 & .89), while VPP is recovered for 64% of simulated participants under AIC but
+only 22% under BIC. BIC's margin for ORL on the real data therefore partly reflects its
+penalty on VPP's extra parameters, and AIC is the more reliable criterion for comparing there two
+models. Under AIC, the real data's 64 VPP wins are far more than the roughly 10 expected if
 everyone behaved like ORL, which suggests some participants show VPP-like behavior that ORL misses.
 
 ### Sensitivity to parameter limits
@@ -247,22 +287,32 @@ is part of the planned extension below.
 
 ## Limitations
 
-1. There are issues of heterogeneity: many healthy participants never learn to favor the winning decks (Steingroever et al., 2013; here, the winning decks received only 50.6% of all choices), but we still use it regularly to assess decision-making deficits. This should make us question our belief in the test's validity.
+1. There are issues of heterogeneity: many healthy participants never learn to favor the winning decks
+(Steingroever et al., 2013; here, the winning decks received only 50.6% of all choices), but we still use
+it regularly to assess decision-making deficits. This should make us question our belief in the test's validity.
 2. I used per-participant maximum likelihood rather than a hierarchical estimation.
 3. I only refit perseveration parameters with wider limits, there were cases (e.g., VPP λ and A) that were not rechecked.
 4. The simulator function used draws outcomes at random from each deck rather than using the task's actual card sequence.
 5. AIC & BIC count parameters rather than assessing the model's actual flexibility.
-6. Model recovery used one simulated dataset per participant, and BIC could not reliably recover VPP, so BIC-based conclusions about VPP should be read cautiosly.
+6. Model recovery used one simulated dataset per participant, and BIC could not reliably recover VPP,
+so BIC-based conclusions about VPP should be read cautiosly.
 7. I used one dataset of healthy adults, so the results may not hold for clinical groups or other payoff schemes.
+8. βP_loss is estimated from fewer trials than βP_win (losses are less frequent than gains) and recovered less well
+(r = .83 vs. .90). Many βP estimates sit at the +/- 10 limit (48 βP_win, 31 βP_loss); at the limit, the sign recovers
+but not the size.
 
-## Planned extension: outcome-dependent perseveration in ORL
+
+## Extension: outcome-dependent perseveration in ORL
 
 
 **Motivation:** ORL fit best by total AIC & BIC, but its perseveration ignores outcomes,
-and it underpredicts how much participants stay after gains and switch after losses (win-stay, lose-shift).
-VPP, whose perseveration depends on whether the last outcome was a gain or a loss, comes much closer (see "Generative check").
+and it underpredicts how much participants stay after gains and switch after losses
+(win-stay, lose-shift). VPP, whose perseveration depends on whether the last outcome was
+a gain or a loss, comes much closer (see "Generative check").
 
-**Proposed variant:** What I want to work on next is an ORL variant that splits perseveration into separate traces after gains and after losses, each with its own weight (βP_win, βP_loss); it would reduce to ORL when the two weights are equal (6 parameters vs. 5).
+**Proposed variant:** What I want to work on next is an ORL variant that splits
+perseveration into separate traces after gains and after losses, each with its own weight
+(βP_win, βP_loss); it would reduce to ORL when the two weights are equal (6 parameters vs. 5).
 
 **Analysis details** (added October 24, 2026, before fitting the variant):
 - A net outcome of 0 counts as a gain, as in ORL & the WSLS definition.
@@ -276,18 +326,28 @@ of an unlucky search.
 **Predictions** (written before fitting):
 1. The variant beats ORL on summed AIC & BIC.
 2. βP_win > βP_loss for most participants.
-3. It reproduces the observed win-stay, lose-shift.
+3. It reproduces the observed win-stay, lose-shift. (criterion added October 25,
+before running the check: CL includes 0, r ≥ .77)
 4. Its new parameters recover acceptably, call it r ≥ .6 between true and recovered βP_win − βP_loss,
 with the direction of the difference recovered for at least 75% of participants.
+(threshold added October 25, before running parameter recovery)
+
+**Test sample:** The hypothesis came from the Horstmann data, so the confirmatory test uses
+a held-out study from the same pool with the same task: Steingroever et al.
+(in preparation, listed in the 2015 data paper), N = 70, 100 trials, payoff scheme 2
+(labeled `SteingroverInPrep` in the data file).
+
+**Status:** written October 18, 2026, before any variant code or fitting. Not a formal preregistration,
+since the discovery data had already been analyzed.
 
 **Results so far** (October 24, 2026; Horstmann sample only, held-out sample not yet fit):
 the variant fit better than ORL for 84 of 162 participants on AIC and 55 on BIC. Summed AIC
 favored the variant by 381; summed BIC favored ORL by 41. In model recovery, the variant won
 for 20% (AIC) and 3% (BIC) of ORL-generated participants, and 60% and 39% of variant-generated ones.
-Parameter recovery for the variant has not been run yet.
+Summed AIC: variant 32,718 < ORL 33,099 < VPP 33,190. BIC: ORL 35,209 < variant 35,250 < VPP 36,566.
 
-Prediction check (October 25, 2026; Horstmann sample only):
-1. Partly supported: summed AIC favored the variant (by 381), summed BIC favored ORL (41).
+**Prediction check** (October 25, 2026; Horstmann sample only):
+1. Partly supported: summed AIC favored the variant (by 381), summed BIC favored ORL (by 41).
 2. Supported: βP_win > βP_loss for 121 of 162 participants (75%). In parameter recovery,
 the share of positive differences was the same in true and recovered values (74.7% vs. 74.1%),
 so the fitting dosen't produceit.
@@ -295,7 +355,7 @@ so the fitting dosen't produceit.
 [−0.013, 0.012], t(161) = −0.11, p = .91; observed exceeded simulated for 46%), r = .94
 with observed (thresholds: CI includes 0, r ≥ .77). ORL’s gap was 0.085.
 4. Met: βP_win − βP_loss recovered at r = .75 (Spearman .82), with direction correct for 83%
-(thresholds: r ≥ .6, 75%). Individual parameters recovered at .65-.90
+(thresholds: r ≥ .6, 75%). Individual parameters recovered at .65-.90.
 
 **Exploratory** (not predicted): 
 - βP_loss was negative for 70% of participants and βP_win 52%. Beyond value learning,
@@ -309,23 +369,20 @@ I searched Google Scholar for papers citing Haines et al.
 None split ORL's perseveration by outcome. Outcome-dependent perseveration itself
 isn't new (VPP has it); however to my konwelge, no one has added it to ORL.Search not exhaustive.
 
-**Test sample:** The hypothesis came from the Horstmann data, so the confirmatory test uses
-a held-out study from the same pool with the same task: Steingroever et al.
-(in preparation, listed in the 2015 data paper), N = 70, 100 trials, payoff scheme 2 (labeled `SteingroverInPrep` in the data file).
-
-**Status:** written October 18, 2026, before any variant code or fitting. Not a formal preregistration,
-since the discovery data had already been analyzed.
-
 ## Next steps
 
-- Model recovery between ORL and the variant (can AIC/BIC detect a one-parameter difference?)
+- Held-out test of the variant (SteingroverInPrep, N = 70), with the test plan written first
+- +/- 30 limit check for the variant (promised in Analysis details)
+- Random-effects model selection (Havne't decided if I want to yet)
 - Hierarchical Bayesian fits with hBayesDM as a cross-check, with LOOIC
-- The extension above
-- I'm also planning on comparing it against newer models.
+- Comparing against newer models.
 
 ## How to run
 
-R 4.6.1. Package versions are recorded with renv: open the project in RStudio and run `renv::restore()`. Then run the scripts in `scripts/` in numbered order. Each script loads what it needs from earlier ones, and results are saved to `output/` so later scripts don't refit.
+R 4.6.1. Package versions are recorded with renv: open the project
+in RStudio and run `renv::restore()`. Then run the scripts in `scripts/`
+in numbered order. Each script loads what it needs from earlier ones, and
+results are saved to `output/` so later scripts don't refit.
 
 | Script | What it does | Approx. time* |
 |---|---|---|
@@ -344,7 +401,7 @@ R 4.6.1. Package versions are recorded with renv: open the project in RStudio an
 | `11_fit_orl_wl.R` | Fits the ORL variant to all participants (one start at each person's ORL fit); refits the 3 that ended at the limits | ~30 min |
 | `12_model_recovery_wl.R` | Model recovery: simulates from ORL and the variant, fits both | ~45 min |
 | `12b_model_recovery_wl_summary.R` | Summarizes ORL-vs-variant model recovery | seconds |
-| `13_recovery_wl.R` | Parameter recovery for the ORL variant, including the win/loss split | ~20 min |
+| `13_parameter_recovery_wl.R` | Parameter recovery for the ORL variant, including the win/loss split | ~20 min |
 | `14_wsls_wl.R` | Win-stay/lose-shift: observed vs. simulated from the fitted variant | seconds |
 
 *On an Apple silicon MacBook Air.
