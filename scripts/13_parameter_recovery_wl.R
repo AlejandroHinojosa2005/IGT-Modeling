@@ -61,8 +61,15 @@ c(mean(true_diff > 0), mean(rec_diff > 0))
 
 
 
-
-
+# Save the recovery figure (output/figures/recovery_orl_wl.png)
+dir.create("output/figures", showWarnings = FALSE)
+png("output/figures/recovery_orl_wl.png", width = 2400, height = 1600, res = 200)
+par(mfrow = c(2,3), mar = c(4,4,2,1))
+for (k in 1:6) {
+  plot(true_wl[, k], recovered_wl[, k],, xlab = "True", ylab = "Recovered", main = wl_names[k])
+  abline(0,1)
+}
+dev.off()
 
 
 

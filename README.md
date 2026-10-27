@@ -215,6 +215,7 @@ Correlation between true and recovered values (Pearson / Spearman), 162 simulate
 | PVL-Delta | A .83/.82, α .81/.75, c .89/.88, λ .81/.78 |
 | VPP | A .63/.63, α .53/.54, c .59/.67, λ .59/.59, ε_P .80/.83, ε_N .70/.66, K .75/.69, w .57/.60 |
 | ORL | A_rew .87/.86, A_pun .86/.86, K′ .55/.67, βF .87/.84, βP .85/.85 |
+| ORL variant | ORL's, with βP split into βP_win, βP_loss (−10 to 10) | This project (see Extension) |
 
 **PVL-Delta**
 
@@ -356,6 +357,17 @@ so the fitting dosen't produceit.
 with observed (thresholds: CI includes 0, r ≥ .77). ORL’s gap was 0.085.
 4. Met: βP_win − βP_loss recovered at r = .75 (Spearman .82), with direction correct for 83%
 (thresholds: r ≥ .6, 75%). Individual parameters recovered at .65-.90.
+
+**Parameter recovery** (variant; Pearson / Spearman, 162 simulated participants):
+
+| A_rew | A_pun | K′ | βF | βP_win | βP_loss | βP_win − βP_loss |
+|---|---|---|---|---|---|---|
+| .86/.84 | .85/.73 | .65/.69 | .82/.84 | .90/.92 | .83/.80 | .75/.82 |
+
+![ORL variant parameter recovery](output/figures/recovery_orl_wl.png)
+
+The variant's parameters recover about as well as ORL's; K′ slightly better
+(.65 vs. .55), A_pun's Spearman lower (.73 vs. .86), likely because most A_pun values sit near 0.
 
 **Exploratory** (not predicted): 
 - βP_loss was negative for 70% of participants and βP_win 52%. Beyond value learning,
