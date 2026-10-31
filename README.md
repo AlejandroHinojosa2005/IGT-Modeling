@@ -416,7 +416,7 @@ None split ORL's perseveration by outcome. Outcome-dependent perseveration itsel
 isn't new (VPP has it); however to my konwelge, no one has added it to ORL.Search not exhaustive.
 
 **Held-out test plan** (written October 30, 2026, before loading or fitting the held-out sample):
-- Sample: SteingroverInPrep, N = 70, 100 trials, playoff scheme 2.
+- Sample: SteingroverInPrep, N = 70, 100 trials, payoff scheme 2.
 - Procedure: Same as Horstmann. ORL is fit first (20 starts); then the variant (20 starts, plus
 one at that participant's ORL fit) with +/-10 limits. Simulations draw outcomes from this sample's own trials
 - Predictions:
@@ -424,7 +424,7 @@ one at that participant's ORL fit) with +/-10 limits. Simulations draw outcomes 
 BIC: not predicted to favor the variant. Model recovery showed BIC detects the variant only 39% of the time
 when it’s true, and on Horstmann it favored ORL by 41 (about 0.25 per participant). I expect another close result.
 BIC will be reported either way.
-2. The variant wins on AIC for more than 25% of participants, the false-positive rate in model recovery.
+2. The variant wins on AIC for at least 21 of 70 participants (30%; one-sided binomial test against model recovery’s 20% false-positive rate, p < .05).
 3. The variant reproduces WSLS: the paired difference's 95% CI includes 0, and its correlation with observed
 WSLS is at least as high as ORL's on the same sample.
 4. A_pun's same-person correlation between ORL and the variant falls below .80 (.91 on ORL-generated Horstmann data).
