@@ -260,6 +260,29 @@ and didn’t change the model ranking, so the limits didn’t drive the comparis
 Participants at the βP limit had higher K′ than the other participants (median 1.49 vs. 0.25),
 likely because when perseveration fades fast, it needs a large weight to affect choices at all.
 
+### Hierarchical cross-check (hBayesDM)
+
+I also fit the three models hierarchically with hBayesDM 2.0.1 (CmdStan 2.40.0; 4 chains × 4,000 iterations, 1,000 warmup),
+which estimates all participants at once and pulls noisy individual estimates toward the group. All group-level parameters
+converged (R̂ ≤ 1.1); one participant per model did not (ORL participant 130, PVL-Delta participant 44).
+
+Rank agreement between hierarchical and maximum-likelihood estimates (Spearman ρ):
+
+| Model | Agreement |
+|---|---|
+| PVL-Delta | A .91, α .86, c .92, λ .89 |
+| VPP | A .69, α .75, c .52, λ .68, ε_P .82, ε_N .80, K .76, w .44 |
+| ORL | A_rew .83, A_pun .89, K′ .24, βF .85, βP .73 |
+
+The two methods agree where parameter recovery was good and disagree where it was poor (ORL's K′, VPP's w and c):
+when the data say little about a parameter, the hierarchical fit leans on the group average.
+
+LOOIC ranked VPP first (VPP 33,003; ORL 33,434; PVL-Delta 36,731), reversing the AIC/BIC ranking, but it can't be
+trusted here: Pareto k exceeded 0.7 for 150 of 162 participants (PVL-Delta), 160 (VPP), and all 162 (ORL). hBayesDM's
+LOOIC leaves out whole participants, and in a hierarchical model each participant has their own parameters,
+so the approximation LOOIC relies on breaks down. A reliable hierarchical comparison would need refitting with
+participants actually held out (cross-validation).
+
 ### Generative check: win-stay/lose-shift
 
 | | Mean | Median | Correlation with observed |
