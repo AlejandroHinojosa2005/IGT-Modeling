@@ -44,7 +44,7 @@ orl_wl_nll <- function(par, choice, outcome) {
     EF[j] <- EF[j] + a_chosen * (sgn - EF[j])
     EF[-j] <- EF[-j] + a_unchosen * (-sgn / 3 - EF[-j])
     
-    PSw <- PSw / (1 + K) # Chage 4: both fade,
+    PSw <- PSw / (1 + K) # Change 4: both fade,
     PSl <- PSl / (1 + K) # chosen deck reset in one trace, zeroed in the other
     if (x >= 0) {
       PSw[j] <- 1 / (1 + K); PSl[j] <- 0

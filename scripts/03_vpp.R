@@ -26,6 +26,7 @@ vpp_nll <- function(par, choice, outcome) {
   
   for (t in 1:length(choice)) {
     j <- choice[t]
+    
     # log-softmax, computed stably (subtracting the max avoids rounding to zero)
     V <- w * Ev + (1-w) * Pers
     v <- theta * V
@@ -89,7 +90,7 @@ sim_vpp <- function(par, deck_outcomes, n_trials = 100) {
 # Multi-Start Maximum likelihood fit of VPP for one participant.
 # optim() can get stuck, so run it from n_starts random starting points
 # and keep best. Lower limits are 0.01, not 0:
-# at exactly A=0 & cons =0 model is flat in every direction & optim() stops there.
+# at exactly A = 0 & cons =0 model is flat in every direction & optim() stops there.
 fit_vpp <- function(choice, outcome, n_starts = 20, eps_lim = 5) {
   lower <- c(.01, .01, .01, .01, -eps_lim, -eps_lim, .01, .01) # A, alpha, cons, lambda, epP, epN, K, w
   upper <- c(1, 2, 5, 10, eps_lim, eps_lim, 1, 1)

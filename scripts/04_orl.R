@@ -6,6 +6,7 @@
 # choice = one participant's deck choice (1-4)
 # outcome = that participant's raw net outcomes (divided by 100 inside)
 source("scripts/01_load_data.R")
+
 orl_nll <- function(par, choice, outcome) {
   
   Arew <- par[1]
@@ -13,8 +14,10 @@ orl_nll <- function(par, choice, outcome) {
   Kprime <- par[3]
   betaF <- par[4]
   betaP <- par[5]
+  
   # decay: K = 3^Kprime - 1 (Eq. 11)
   K <- 3^Kprime - 1
+  
   # starting values: EV, EF, PS (four zeros each); ll
   Ev <- c(0, 0, 0, 0)
   EF <- c(0, 0, 0, 0)
@@ -25,14 +28,18 @@ orl_nll <- function(par, choice, outcome) {
   
     # 1. which deck was chose,
     j <- choice[t]
-    # 2. combined value V (Eq. 12); log-sotmax with theta = 1
+    
+    # 2. combined value V (Eq. 12); log-softmax with theta = 1
     V <- Ev + EF * betaF + PS * betaP
     logp <- V - max(V) - log(sum(exp(V - max(V))))
+    
     # 3. add log probability of the chosen deck to ll
     ll <- ll + logp[j]
+    
     # 4. outcome / 100, & its sign
     x <- outcome[t] / 100
     sgn <- sign(x)
+    
     # 5. learning rates:chosen deck uses Arew if x >= 0, elseApun;
     #    unchosen decks use the other one
     if (x >= 0) {
@@ -42,11 +49,14 @@ orl_nll <- function(par, choice, outcome) {
       a_chosen <- Apun
       a_unchosen <- Arew
     }
+    
     # 6. update the chosen deck's EV (Eq. 7) & EF (Eq. 8)
     Ev[j] <- Ev[j] + a_chosen * (x - Ev[j])
     EF[j] <- EF[j] + a_chosen * (sgn - EF[j])
+    
     # 7. update the unchosen deck's EF (Eq. 9), with C = 3
     EF[-j] <- EF[-j] + a_unchosen * (-sgn / 3 - EF[-j])
+    
     # 8. update PS (Eq. 10)
     PS <- PS / (1 + K)
     PS[j] <- 1 / (1+K)
@@ -55,7 +65,6 @@ orl_nll <- function(par, choice, outcome) {
 }
 
 # Simulate one ORL participant (used for parameter recovery).
-
 sim_orl <- function(par, deck_outcomes, n_trials = 100) {
   Arew <- par[1]
   Apun <- par[2]

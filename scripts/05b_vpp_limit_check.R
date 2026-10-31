@@ -1,4 +1,4 @@
-# check: is VPP's epsilon limit (+/- 5) consting fit?
+# check: is VPP's epsilon limit (+/- 5) costing fit?
 # Refit participants whose epP or epN hit the limit, with limits of +/- 15
 #Mirror of ORL betaP check in 05_fit_models.R
 source("scripts/03_vpp.R")
@@ -14,3 +14,6 @@ for (n in 1:length(pinned_vpp)) {
 
 improve_vpp <- results_vpp$nll[pinned_vpp] - nll_wide_vpp
 saveRDS(list(pinned = pinned_vpp,improve = improve_vpp), "output/vpp_limit_check.rds")
+
+
+

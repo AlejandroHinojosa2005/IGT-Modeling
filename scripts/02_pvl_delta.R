@@ -25,12 +25,13 @@ pvl_delta_nll <- function(par, choice, outcome) {
   
   for (t in 1:length(choice)) {
     j <- choice[t]
+    
     # log-softmax, computed stably (subtracting the max avoids rounding to zero)
     v <- theta*Ev
     logp <- v - max(v) - log(sum(exp(v-max(v))))
     ll <- ll + logp[j]
-    x <- outcome[t]/100
-    if (x >=0) {
+    x <- outcome[t] / 100
+    if (x >= 0) {
       u <- x^alpha
     } else {
       u <- -lambda * abs(x)^alpha

@@ -56,6 +56,12 @@ p <- c("Arew", "Apun", "Kprime", "betaF")
 round(diag(cor(orl[, p], wl[, p])), 2)          # same people: does each parameter keep its ranking?
 round(colMeans(wl[, p]) - colMeans(orl[, p]), 2) # average shift
 
+# Did the people whose A_pun dropped most have the strongest push away after losses?
+p <- c("Arew", "Apun", "Kprime", "betaF")
+round(diag(cor(orl[, p], results_orl_wl[, p])), 2) # same-person r, ORL vs. variant
+cor(results_orl_wl$Apun - orl$Apun, results_orl_wl$betaPl) # compare with the ORL-generated baseline (.23, script 15): about the same, so this doesn't test the mechanism
+
+
 
 
 
