@@ -8,7 +8,10 @@ reproduce participants’ win-stay/lose-shift behavior. ORL fit best overall,
 but it under-produced win-stay/lose-shift, which VPP reproduced. I then built
 an ORL variant whose perseveration depends on whether the last outcome was gain
 or loss. On the same data, it beat ORL on summed AIC (not BIC), reproduced win-stay/lose-shift,
-and its new parameters recovered well. A test on a held-out sample is next.
+and its new parameters recovered well. On a held-out sample of 70 participants,
+with predictions written before fitting, it again beat ORL on AIC (BIC was nearly tied),
+reproduced win-stay/lose-shift where ORL did not, and 81% of participants showed a stronger
+pull toward the last deck after gains than after losses; 4 of 5 predictions were met.
 
 **Status:** Personal learning project, October 2026.
 
@@ -430,12 +433,24 @@ WSLS is at least as high as ORL's on the same sample.
 4. A_pun's same-person correlation between ORL and the variant falls below .80 (.91 on ORL-generated Horstmann data).
 5. βP_win > βP_loss for at least 43 of 70 participants (61%; one-sided sign test against 50%, p < .05).
 
+**Held-out test results** (October 31, 2026; scored by `19_score_heldout.R` exactly as worded in the plan):
+1. Met: summed AIC favored the variant by 176 (12,907 vs. 13,084). BIC favored ORL by 6 (14,002 vs. 13,996), the close result I expected.
+2. Met: the variant won on AIC for 36 of 70 participants (51%; one-sided binomial test against model recovery's
+20% false-positive rate, p < .001). On BIC it won for 25.
+3. Met: simulated WSLS averaged 0.332 vs. 0.333 observed (paired difference 0.0003, 95% CI [−0.028, 0.028],
+t(69) = 0.02, p = .98) and correlated r = .89 with observed, vs. ORL's .68. ORL again under-produced WSLS
+(0.240; difference 0.093, 95% CI [0.047, 0.139], t(69) = 4.05, p < .001).
+4. Not met: A_pun's same-person correlation between ORL and the variant was .88, close to the .91 baseline
+from ORL-generated data, so the A_pun reordering seen on Horstmann did not replicate.
+5. Met: βP_win > βP_loss for 57 of 70 participants (81%; one-sided sign test, p < .001).
+
 ## Next steps
 
-- Held-out test of the variant (SteingroverInPrep, N = 70), with the test plan written first
-- Random-effects model selection (Havne't decided if I want to yet)
-- Hierarchical Bayesian fits with hBayesDM as a cross-check, with LOOIC
-- Comparing against newer models.
+- Held-out test of the variant (SteingroverInPrep, N = 70): in progress
+- Lapse-term check: add a random-choice term ε (Shteingart, Neiman & Loewenstein, 2013, Eq. 2) to ORL and the variant, and test whether the win/loss asymmetry survives
+- On Baylor's Kodiak cluster: a hierarchical (Stan) version of the variant; 10-fold cross-validation of the hierarchical models, in place of the unreliable LOOIC; repeated model and parameter recovery (10+ simulated datasets per participant)
+- Random-effects model selection (undecided)
+- Comparing against newer models
 
 ## How to run
 
