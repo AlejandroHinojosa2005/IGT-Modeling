@@ -423,7 +423,7 @@ isn't new (VPP has it); however to my konwelge, no one has added it to ORL.Searc
 - Procedure: Same as Horstmann. ORL is fit first (20 starts); then the variant (20 starts, plus
 one at that participant's ORL fit) with +/-10 limits. Simulations draw outcomes from this sample's own trials
 - Predictions:
-1.Summed AIC favors the variant over ORL.
+1. Summed AIC favors the variant over ORL.
 BIC: not predicted to favor the variant. Model recovery showed BIC detects the variant only 39% of the time
 when it’s true, and on Horstmann it favored ORL by 41 (about 0.25 per participant). I expect another close result.
 BIC will be reported either way.
@@ -474,13 +474,24 @@ results are saved to `output/` so later scripts don't refit.
 | `09b_model_recovery_summary.R` | Summarizes model recovery (who wins, per person and summed) | seconds |
 | `10_orl_variant.R` | ORL variant: likelihood, simulator, and checks | seconds |
 | `11_fit_orl_wl.R` | Fits the ORL variant to all participants (one start at each person's ORL fit); refits the 3 that ended at the limits; compares with ORL and VPP; checks how shared parameters shift | ~30 min |
+| `11b_wl_limit_check.R` | Variant parameter-limit check (βP_win, βP_loss: ±10 → ±30) | ~15 min |
 | `12_model_recovery_wl.R` | Model recovery: simulates from ORL and the variant, fits both | ~45 min |
 | `12b_model_recovery_wl_summary.R` | Summarizes ORL-vs-variant model recovery | seconds |
 | `13_parameter_recovery_wl.R` | Parameter recovery for the ORL variant, including the win/loss split | ~20 min |
 | `14_wsls_wl.R` | Win-stay/lose-shift: observed vs. simulated from the fitted variant | seconds |
 | `15_apun_baseline.R` | Baseline for the A_pun finding: simulates from ORL, fits ORL and the variant, compares shared parameters | ~20 min |
+| `16_hbayesdm.R` | Hierarchical Bayesian fits (hBayesDM) of PVL-Delta, VPP, and ORL; LOOIC | ~6 hours |
+| `16b_hbayesdm_compare.R` | Compares hierarchical and maximum-likelihood estimates; convergence and LOOIC reliability | seconds |
+| `17_load_heldout.R` | Loads the held-out sample (SteingroverInPrep) and checks its structure and payoffs | seconds |
+| `18_fit_heldout.R` | Fits ORL and the variant to the held-out sample | ~20–30 min |
+| `19_score_heldout.R` | Scores the held-out predictions exactly as worded in the plan | ~1 min |
+| `20_stan_wl_test.R` | Tests the hierarchical (Stan) version of the variant on 30 simulated participants | ~20 min |
+| `21_stan_wl_horstmann.R` | Hierarchical (Stan) fit of the ORL variant to all 162 participants | ~2 hours |
+| `21b_stan_wl_summary.R` | Summarizes the hierarchical variant fit: diagnostics, group-level asymmetry, agreement with MLE | seconds |
 
 *On an Apple silicon MacBook Air.
+
+Scripts 16 and 20 also need CmdStan, installed separately with `cmdstanr::install_cmdstan()` (version 2.40.0 used here); renv doesn't track it.
 
 ## How this project was built
 
