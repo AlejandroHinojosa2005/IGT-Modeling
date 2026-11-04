@@ -444,6 +444,9 @@ t(69) = 0.02, p = .98) and correlated r = .89 with observed, vs. ORL's .68. ORL 
 from ORL-generated data, so the A_pun reordering seen on Horstmann did not replicate.
 5. Met: βP_win > βP_loss for 57 of 70 participants (81%; one-sided sign test, p < .001).
 
+**Kodiak test prediction**
+I predict that the variant will beat ORL on both fold-LOO and folds 1-10, by more than 2 SE.
+
 ## Next steps
 
 - Held-out test of the variant (SteingroverInPrep, N = 70): in progress
