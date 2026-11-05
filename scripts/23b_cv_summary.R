@@ -1,6 +1,6 @@
 # Combine the cross-validation folds and compare ORL vs. the variant.
 # Positive differences favor the variant (wl).
-quick <- TRUE   # set to FALSE once the full Kodiak runs are in
+quick <- FALSE   # set to FALSE once the full Kodiak runs are in
 tag <- if (quick) "_quick" else ""
 folds <- if (quick) 1 else 1:10
 
@@ -11,6 +11,8 @@ read_fold <- function(model, fold) {
 # 1. Fold 0: per-trial PSIS-LOO
 loo_orl <- read_fold("orl", 0)$loo
 loo_wl <- read_fold("wl", 0)$loo
+loo_orl
+loo_wl
 loo_cmp <- loo::loo_compare(list(orl = loo_orl, wl = loo_wl))
 loo_cmp
 
@@ -42,7 +44,9 @@ runs
 saveRDS(list(loo_cmp = loo_cmp, cv_diff = cv_diff, per_subj = per_subj, runs = runs),
         sprintf("output/cv_summary%s.rds", tag))
 
-
+# Variant advantage per fold (compare with ORL's max_rhat in runs)
+both$fold <- (both$trial - 1) %% 10 + 1
+round(tapply(both$diff, both$fold, sum), 1)
 
 
 

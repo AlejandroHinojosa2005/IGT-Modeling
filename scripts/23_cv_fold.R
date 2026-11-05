@@ -29,8 +29,8 @@ stan_data <- list(
 stan_file <- if (model == "orl") "stan/igt_orl_cv.stan" else "stan/igt_orl_wl_cv.stan"
 mod <- cmdstan_model(stan_file)
 fit <- mod$sample(data = stan_data, chains = 4, parallel_chains = 4,
-                  iter_warmup = if (quick) 200 else 1000,
-                  iter_sampling = if (quick) 200 else 1000,
+                  iter_warmup = if (quick) 200 else 2000,
+                  iter_sampling = if (quick) 200 else 2000,
                   adapt_delta = 0.95, seed = 2026, refresh = 500)
 
 dir.create("output/cv", showWarnings = FALSE)
