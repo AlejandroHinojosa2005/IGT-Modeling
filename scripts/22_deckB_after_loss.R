@@ -69,6 +69,13 @@ legend("topright", lty = 1, lwd = 2, bty = "n", col = c("black", "red", "blue", 
 dev.off()
 
 
+# Paired tests: observed vs. simulated P(choose B), averaged over trials 2-10 after the big loss
+obs <- rowMeans(obs_loss[, 2:10])
+t.test(obs, rowMeans(orl_loss[, 2:10]), paired = TRUE)
+t.test(obs, rowMeans(wl_loss[, 2:10]), paired = TRUE)
+mean(obs > rowMeans(orl_loss[, 2:10]))   # share of people above ORL
+mean(obs > rowMeans(wl_loss[, 2:10]))    # share above the variant
+
 
 
 
