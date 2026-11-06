@@ -4,7 +4,7 @@ I implemented three reinforcement-learning models of the Iowa Gambling Task
 (PVL-Delta, VPP, and ORL) in R from their published equations and fit them
 to 162 healthy adults by maximum likelihood. I then compared the models
 (AIC/BIC), ran parameter recovery, and checked whether each model could
-reproduce participants’ win-stay/lose-shift behavior. ORL fit best overall,
+reproduce participants’ win-stay/lose-shift behavior. Of the three, ORL fit best overall,
 but it under-produced win-stay/lose-shift, which VPP reproduced. I then built
 an ORL variant whose perseveration depends on whether the last outcome was gain
 or loss. On the same data, it beat ORL on summed AIC (not BIC), reproduced win-stay/lose-shift,
@@ -12,8 +12,10 @@ and its new parameters recovered well. On a held-out sample of 70 participants,
 with predictions written before fitting, it again beat ORL on AIC (BIC was nearly tied),
 reproduced win-stay/lose-shift where ORL did not, and 81% of participants showed a stronger
 pull toward the last deck after gains than after losses; 4 of 5 predictions were met.
+A hierarchical (Stan) version of the variant shows the same asymmetry at the group level, and a first
+cross-validation run on Baylor's Kodiak cluster favors the variant; it is being rerun because several ORL fits did not converge.
 
-**Status:** Personal learning project, October 2026.
+**Status:** Personal learning project, ongoing (last updated November 5, 2026).
 
 ## What's in this repository
 
@@ -24,13 +26,16 @@ each with a likelihood function, a simulator, and a multi-start maximum-likeliho
 - Model comparison (AIC/BIC), sensitivity checks on parameter limits, and a generative check of
 win-stay/lose-shift behavior
 - An ORL variant with outcome-dependent perseveration: fits, model recovery against ORL,
-parameter recovery, and win-stay/lose-shift check
+parameter recovery, win-stay/lose-shift check, and a confirmatory test on a held-out sample
+- Hierarchical Bayesian cross-checks: hBayesDM fits of the three original models, and a Stan version of the variant
+- Cross-validation code comparing the hierarchical ORL and variant, with a job script for Baylor's Kodiak cluster
+- An exploratory analysis of how people return to deck B after its big loss
 
 ## Background
 
 Back in 1994, Bechara et al. wanted to figure out a way to assess decision making
 deficits in people with ventromedial prefrontal damage who despite normal intelligence,
-displayed poor decision making. To do this they developed The Iowa Gambling Task.
+displayed poor decision making. To do this they developed the Iowa Gambling Task.
 The scheme goes as follows:
 
 The participant would be given $2000 of facsimile money. They would then be shown four
@@ -94,10 +99,13 @@ the parameter count to five: A_rew, A_pun, K, βF, βP.
 | PVL-Delta | A (0.01–1), α (0.01–2), c (0.01–5), λ (0.01–10) | Ahn et al. (2008) |
 | VPP | PVL-Delta's four, plus ε_P, ε_N (−5 to 5), K (0.01–1), w (0.01–1) | Worthy, Pang & Byrne (2013) |
 | ORL | A_rew, A_pun (0.01–1), K′ (0–5), βF, βP (−10 to 10) | Haines, Vassileva & Ahn (2018) |
+| ORL variant | ORL's, with βP split into βP_win, βP_loss (−10 to 10) | This project (see Extension) |
 
 Implementation notes:
-- Equations follow Haines et al. (2018). My ORL code was written from the published equations and
-checked against the hBayesDM Stan implementation (`igt_orl.stan`); no code was copied.
+- Equations follow Haines et al. (2018). My R code for all three models was written from the published
+equations; my ORL code was checked against the hBayesDM Stan implementation (`igt_orl.stan`), and no R code was copied.
+- The Stan files in `stan/` are different: they are modified copies of hBayesDM's `igt_orl.stan` (GPL-3),
+and each file's header says what I changed.
 - Outcomes are divided by 100 (hBayesDM's default scale), so estimates are comparable to hBayesDM's.
 - The papers leave VPP's ε and ORL's β parameters unbounded; the limits above are my choice
 (see "Sensitivity to parameter limits").
@@ -112,7 +120,10 @@ from Steingroever et al.'s (2015) "many labs" data pool (https://osf.io/8t7rm, C
 and a subset appears in Horstmann, Villringer & Neumann (2012). Its payoffs match the original except for
 deck C, whose pun is always -50 rather than varying between -25 & -75, so the expected outcomes stay the
 same; the card order is also randomly shuffled rather than fixed (payoff scheme 2 in the data paper).
-For every trial, the chosen deck and net outcome was given, as (gain + loss, with loss stored as negative numbers).
+For every trial, the data give the chosen deck and the net outcome (gain + loss, with losses stored as negative numbers).
+
+The held-out test (see Extension) uses a second study from the same pool and file: SteingroverInPrep
+(Steingroever et al., in preparation, listed in the 2015 data paper), 70 participants, 100 trials, payoff scheme 2.
 
 The data are **not** included in this repository. To run the code, download
 `IGTdata.rdata` from OSF and place it in a folder named `data-raw/` in the project root.
@@ -123,7 +134,7 @@ The data are **not** included in this repository. To run the code, download
 For a given set of parameters, the model assigns a probability (via softmax)
 to the deck the participant chose on each trial; the likelihood is the product
 of those 100 probabilities, then I searched for the parameters that made the observed
-nce of choices most probable. This was done by summing the log-probabilities instead of
+sequence of choices most probable. This was done by summing the log-probabilities instead of
 multiplying the probabilities. This was done because a product of 100 small numbers shrinks
 toward 0, and minimized the negative of that sum (the negative log-likelihood (nll)).
 The log-softmax was computed by subtracting the largest value before exponentiating,
@@ -156,7 +167,7 @@ from the outcomes actually observed for each deck. The synthetic data were refit
 the same procedure. True & recovered values were compared with Pearson & Spearman
 correlations and counted how many estimates landed on a bound.
 
-**Model Recovery:** To check wherther the comparison can tell the models apart,
+**Model Recovery:** To check whether the comparison can tell the models apart,
 I simulated one synthetic participant per real participant from each model
 (using that participant's fitted parameters with outcomes drawn as in parameter
 recovery), then fit the three models to the simulated datasets with the same
@@ -176,6 +187,7 @@ for each, and averaged them. I compared observed and simulated WSLS across parti
 a correlation and a paired t-test.
 
 **Software:** R 4.6.1 (in RStudio) was used for all analyses, with optim from R's built-in stats package,
+hBayesDM 2.0.1 and cmdstanr 0.9.0 (CmdStan 2.40.0) for the hierarchical fits, loo for cross-validation,
 and renv to record package versions so the analysis can be rerun with the same setup. The code for each step
 is in "scripts/", numbered in the order the scripts run.
 
@@ -200,14 +212,15 @@ win-stay/lose-shift averaged 0.30 (median 0.26).
 | Best model, by participant (AIC) | 14 | 64 | 84 |
 | Best model, by participant (BIC) | 33 | 18 | 111 |
 
-ORL fit best on both criteria: BIC favored it by 1,357 (through model recovery shows BIC
+Of the three original models, ORL fit best on both criteria: BIC favored it by 1,357 (though model recovery shows BIC
 leans toward ORL over VPP; see Model recovery), while AIC's gap was much smaller
 (91, about .6 per participant). 
 VPP actually fits the choices better in raw terms (summed nll 440.7 lower than ORL’s),
 but not by enough to justify its three extra parameters.
 PVL-Delta was worst on both. One last observation: 
 different people are best fit by different models;
-under AIC, ORL won for 84 participants, VPP for 64, and PVL-Delta for 14.
+under AIC, ORL won for 84 participants, VPP for 64, and PVL-Delta for 14;
+under BIC, ORL won for 111, PVL-Delta for 33, and VPP for 18.
 
 ### Parameter recovery
 
@@ -218,7 +231,6 @@ Correlation between true and recovered values (Pearson / Spearman), 162 simulate
 | PVL-Delta | A .83/.82, α .81/.75, c .89/.88, λ .81/.78 |
 | VPP | A .63/.63, α .53/.54, c .59/.67, λ .59/.59, ε_P .80/.83, ε_N .70/.66, K .75/.69, w .57/.60 |
 | ORL | A_rew .87/.86, A_pun .86/.86, K′ .55/.67, βF .87/.84, βP .85/.85 |
-| ORL variant | ORL's, with βP split into βP_win, βP_loss (−10 to 10) | This project (see Extension) |
 
 **PVL-Delta**
 
@@ -247,7 +259,7 @@ Summed across participants, AIC picked the generating model in all three cases, 
 even when VPP generated the data (230). Per participant, ORL is recovered well by both criteria
 (.88 & .89), while VPP is recovered for 64% of simulated participants under AIC but
 only 22% under BIC. BIC's margin for ORL on the real data therefore partly reflects its
-penalty on VPP's extra parameters, and AIC is the more reliable criterion for comparing there two
+penalty on VPP's extra parameters, and AIC is the more reliable criterion for comparing these two
 models. Under AIC, the real data's 64 VPP wins are far more than the roughly 10 expected if
 everyone behaved like ORL, which suggests some participants show VPP-like behavior that ORL misses.
 
@@ -283,8 +295,8 @@ when the data say little about a parameter, the hierarchical fit leans on the gr
 LOOIC ranked VPP first (VPP 33,003; ORL 33,434; PVL-Delta 36,731), reversing the AIC/BIC ranking, but it can't be
 trusted here: Pareto k exceeded 0.7 for 150 of 162 participants (PVL-Delta), 160 (VPP), and all 162 (ORL). hBayesDM's
 LOOIC leaves out whole participants, and in a hierarchical model each participant has their own parameters,
-so the approximation LOOIC relies on breaks down. A reliable hierarchical comparison would need refitting with
-participants actually held out (cross-validation).
+so the approximation LOOIC relies on breaks down. A reliable hierarchical comparison needs held-out data instead;
+the cross-validation in the Extension holds out single trials rather than whole participants (see "Cross-validation").
 
 ### Generative check: win-stay/lose-shift
 
@@ -306,30 +318,16 @@ and the gap grows for participants with strong WSLS. VPP, whose perseveration de
 the last outcome was a gain or a loss, reproduces both: who has high or low WSLS (r = .93)
 and how much (0.29 vs. 0.30).
 
-Overall, ORL is the best account of these choices: it wins on both total AIC and BIC,
+Of the three original models, ORL is the best account of these choices: it wins on both total AIC and BIC,
 and most of its parameters recover well. But it misses win-stay/lose-shift, which VPP reproduces.
 A likely reason is that VPP’s perseveration depends on whether the last outcome was a gain or a loss,
 while ORL’s ignores outcomes. Testing that explanation, by adding outcome-dependent perseveration to ORL,
-is part of the planned extension below.
-
-## Limitations
-
-1. There are issues of heterogeneity: many healthy participants never learn to favor the winning decks
-(Steingroever et al., 2013; here, the winning decks received only 50.6% of all choices), but we still use
-it regularly to assess decision-making deficits. This should make us question our belief in the test's validity.
-2. I used per-participant maximum likelihood rather than a hierarchical estimation.
-3. I only refit perseveration parameters with wider limits, there were cases (e.g., VPP λ and A) that were not rechecked.
-4. The simulator function used draws outcomes at random from each deck rather than using the task's actual card sequence.
-5. AIC & BIC count parameters rather than assessing the model's actual flexibility.
-6. Model recovery used one simulated dataset per participant, and BIC could not reliably recover VPP,
-so BIC-based conclusions about VPP should be read cautiosly.
-7. I used one dataset of healthy adults, so the results may not hold for clinical groups or other payoff schemes.
-8. βP_loss is estimated from fewer trials than βP_win (losses are less frequent than gains) and recovered less well
-(r = .83 vs. .90). Many βP estimates sit at the +/- 10 limit (48 βP_win, 31 βP_loss); at the limit, the sign recovers
-but not the size.
-
+is the extension below.
 
 ## Extension: outcome-dependent perseveration in ORL
+
+The plan (motivation, variant, analysis details, predictions, test sample) is kept as written on the dates shown;
+results follow it.
 
 
 **Motivation:** ORL fit best by total AIC & BIC, but its perseveration ignores outcomes,
@@ -354,7 +352,7 @@ of an unlucky search.
 1. The variant beats ORL on summed AIC & BIC.
 2. βP_win > βP_loss for most participants.
 3. It reproduces the observed win-stay, lose-shift. (criterion added October 25,
-before running the check: CL includes 0, r ≥ .77)
+before running the check: CI includes 0, r ≥ .77)
 4. Its new parameters recover acceptably, call it r ≥ .6 between true and recovered βP_win − βP_loss,
 with the direction of the difference recovered for at least 75% of participants.
 (threshold added October 25, before running parameter recovery)
@@ -367,7 +365,7 @@ a held-out study from the same pool with the same task: Steingroever et al.
 **Status:** written October 18, 2026, before any variant code or fitting. Not a formal preregistration,
 since the discovery data had already been analyzed.
 
-**Results so far** (October 24, 2026; Horstmann sample only, held-out sample not yet fit):
+**Results on the Horstmann sample** (October 24, 2026):
 the variant fit better than ORL for 84 of 162 participants on AIC and 55 on BIC. Summed AIC
 favored the variant by 381; summed BIC favored ORL by 41. In model recovery, the variant won
 for 20% (AIC) and 3% (BIC) of ORL-generated participants, and 60% and 39% of variant-generated ones.
@@ -377,7 +375,7 @@ Summed AIC: variant 32,718 < ORL 33,099 < VPP 33,190. BIC: ORL 35,209 < variant 
 1. Partly supported: summed AIC favored the variant (by 381), summed BIC favored ORL (by 41).
 2. Supported: βP_win > βP_loss for 121 of 162 participants (75%). In parameter recovery,
 the share of positive differences was the same in true and recovered values (74.7% vs. 74.1%),
-so the fitting dosen't produceit.
+so the fitting doesn't produce it.
 3. Met: simulated WSLS averaged 0.30 vs. 0.30 observed (paired difference −0.001, 95% CI
 [−0.013, 0.012], t(161) = −0.11, p = .91; observed exceeded simulated for 46%), r = .94
 with observed (thresholds: CI includes 0, r ≥ .77). ORL’s gap was 0.085.
@@ -416,12 +414,12 @@ summed BIC still favors ORL (by at least 25), so the limits don’t drive the co
 I searched Google Scholar for papers citing Haines et al.
 (2018) that mention perseveration, outcome-dependence, or win-stay.
 None split ORL's perseveration by outcome. Outcome-dependent perseveration itself
-isn't new (VPP has it); however to my konwelge, no one has added it to ORL.Search not exhaustive.
+isn't new (VPP has it); however, to my knowledge, no one has added it to ORL. Search not exhaustive.
 
 **Held-out test plan** (written October 30, 2026, before loading or fitting the held-out sample):
 - Sample: SteingroverInPrep, N = 70, 100 trials, payoff scheme 2.
 - Procedure: Same as Horstmann. ORL is fit first (20 starts); then the variant (20 starts, plus
-one at that participant's ORL fit) with +/-10 limits. Simulations draw outcomes from this sample's own trials
+one at that participant's ORL fit) with +/-10 limits. Simulations draw outcomes from this sample's own trials.
 - Predictions:
 1. Summed AIC favors the variant over ORL.
 BIC: not predicted to favor the variant. Model recovery showed BIC detects the variant only 39% of the time
@@ -434,7 +432,7 @@ WSLS is at least as high as ORL's on the same sample.
 5. βP_win > βP_loss for at least 43 of 70 participants (61%; one-sided sign test against 50%, p < .05).
 
 **Held-out test results** (October 31, 2026; scored by `19_score_heldout.R` exactly as worded in the plan):
-1. Met: summed AIC favored the variant by 176 (12,907 vs. 13,084). BIC favored ORL by 6 (14,002 vs. 13,996), the close result I expected.
+1. Met: summed AIC favored the variant by 176 (variant 12,907 vs. ORL 13,084). BIC favored ORL by 6 (ORL 13,996 vs. variant 14,002), the close result I expected.
 2. Met: the variant won on AIC for 36 of 70 participants (51%; one-sided binomial test against model recovery's
 20% false-positive rate, p < .001). On BIC it won for 25.
 3. Met: simulated WSLS averaged 0.332 vs. 0.333 observed (paired difference 0.0003, 95% CI [−0.028, 0.028],
@@ -444,8 +442,44 @@ t(69) = 0.02, p = .98) and correlated r = .89 with observed, vs. ORL's .68. ORL 
 from ORL-generated data, so the A_pun reordering seen on Horstmann did not replicate.
 5. Met: βP_win > βP_loss for 57 of 70 participants (81%; one-sided sign test, p < .001).
 
-**Kodiak test prediction**
-I predict that the variant will beat ORL on both fold-LOO and folds 1-10, by more than 2 SE.
+**Hierarchical version of the variant** (Stan; scripts 20, 21 and 21b):
+I wrote a hierarchical Stan version of the variant (`stan/igt_orl_wl.stan`, modified from hBayesDM's `igt_orl.stan`),
+which estimates all participants at once and pulls noisy individual estimates toward the group. Before using it on
+real data, I fit it to 30 participants simulated from known parameters (script 20): the parameters came back
+(Spearman ρ = .70–.91, except K′ at .43), as did the win/loss split (βP_win − βP_loss: ρ = .59, direction correct for 80%).
+
+On the 162 Horstmann participants (4 chains × 3,000 draws after 1,000 warmup), there were no divergent transitions,
+the largest R̂ was 1.03, and E-BFMI was 0.57–0.62. Effective sample sizes were above 400 except for three values,
+all for participant 31 (267–311); for the group-level perseveration parameters they were 1,280 (βP_win) and 3,612 (βP_loss).
+
+| Group level | Median | 95% credible interval |
+|---|---|---|
+| μ βP_win | 1.37 | [0.63, 2.16] |
+| μ βP_loss | −2.51 | [−3.38, −1.71] |
+| μ βP_win − μ βP_loss | 3.88 | [2.80, 5.08] |
+
+The group-level difference was positive in all 12,000 posterior draws. Individually, 144 of 162 participants (89%)
+had βP_win > βP_loss, compared with 121 (75%) under maximum likelihood, likely because individual estimates are pulled
+toward a group mean that is itself asymmetric. Rank agreement with the maximum-likelihood fits (Spearman ρ): A_rew .83,
+A_pun .81, K′ .42, βF .85, βP_win .75, βP_loss .79; as with ORL, K′ agrees least.
+
+**Cross-validation** (hierarchical ORL vs. variant; scripts 23 and 23b; running on Baylor's Kodiak cluster):
+hBayesDM's LOOIC was unreliable here (see "Hierarchical cross-check"), and AIC and BIC count parameters rather than
+measuring how flexible a model is. So this comparison asks which hierarchical model better predicts choices it wasn't fit to.
+
+- Folds 1–10: each fold hides every 10th trial (fold 1: trials 1, 11, …, 91; fold 2: trials 2, 12, …, 92; and so on),
+fits both models to the rest, and scores the hidden choices (expected log predictive density, elpd). Across the 10 folds,
+every trial is hidden once. Held-out trials still update the models' values, since their outcomes were seen; only their
+choices are left out of the fit.
+- Fold 0: both models are fit to all trials, and per-trial leave-one-out is estimated with PSIS-LOO (Vehtari, Gelman & Gabry, 2017).
+Unlike hBayesDM's LOOIC, it leaves out single trials rather than whole participants, and every Pareto k was good in a
+10-person test run. Trial 1 is dropped, since both models predict it at chance.
+- The first run used 4 chains × 1,000 draws after 1,000 warmup per fit; the rerun doubles both. Differences between the models are summed within participants,
+with the SE computed across participants; 23b also counts how many participants each model predicts better and checks
+convergence for every fit.
+
+**Cross-validation prediction** (written November 4, 2026, before the full run was submitted):
+"I predict that the variant will beat ORL on both fold-LOO and folds 1-10, by more than 2 SE."
 
 **Cross-validation results, first run** (preliminary; November 5, 2026):
 On the numbers, the prediction was met: the variant beat ORL on fold-0 PSIS-LOO by 232.7 elpd (SE 30.5) and on the
@@ -459,13 +493,55 @@ where ORL failed (folds 5, 9, 10: mean 19.5) than where ORL converged best (fold
 sampling does not seem to explain it. All 22 fits are being rerun with twice the chain length (2,000 warmup + 2,000 draws),
 and the prediction will be scored on that run. First-run results are in `output/cv_run1/` and `output/cv_summary.rds`.
 
+## Exploratory: returning to deck B after its big loss
+
+*Not predicted (script 22).* Deck B's rare −1,150 net loss is the task's most dramatic outcome, so I looked at how people
+respond to it. For each participant, I computed the probability of choosing deck B on each of the 20 trials after a big
+B loss and compared it with the same curve simulated from their fitted ORL and variant parameters (20 datasets per person,
+as in the win-stay/lose-shift check). All 162 participants had at least one big loss followed by 20 trials.
+
+![Returning to deck B after its big loss](output/figures/deckB_after_bigloss.png)
+
+On the trial right after the loss, ORL matched the drop in choosing deck B (.24 observed and simulated; variant .20;
+after an ordinary B win, .54). But people then came back to deck B faster than either model predicts. Averaged over
+trials 2–10 after the loss, observed P(B) was .33, vs. .24 for ORL (paired difference 0.083, 95% CI [0.057, 0.110],
+t(161) = 6.15, p < .001; observed higher for 73% of participants) and .27 for the variant (0.055, 95% CI [0.028, 0.082],
+t(161) = 3.97, p < .001; 69%).
+
+So the models get the immediate avoidance about right, but in the models the loss keeps its effect longer than it does
+in people. This doesn't look like latent-state inference ("deck B has changed"), which would predict deeper avoidance
+followed by a sharp return; the avoidance here was no deeper than ORL's. One candidate explanation is that people are
+less sensitive to large, rare losses than ORL assumes (diminishing sensitivity, like PVL-Delta's α), which a new model
+would need to test on held-out data.
+
+## Limitations
+
+1. There are issues of heterogeneity: many healthy participants never learn to favor the winning decks
+(Steingroever et al., 2013; here, the winning decks received only 50.6% of all choices), but we still use
+it regularly to assess decision-making deficits. This should make us question our belief in the test's validity.
+2. My main comparisons and the held-out test used per-participant maximum likelihood. The hierarchical fits
+(hBayesDM and the Stan variant) are cross-checks, and the hierarchical comparison by cross-validation is still running.
+3. I only refit perseveration parameters with wider limits; there were cases (e.g., VPP λ and A) that were not rechecked.
+4. The simulator function used draws outcomes at random from each deck rather than using the task's actual card sequence.
+5. AIC & BIC count parameters rather than assessing the model's actual flexibility; the cross-validation is meant to address this.
+6. Model recovery used one simulated dataset per participant, and BIC could not reliably recover VPP,
+so BIC-based conclusions about VPP should be read cautiously.
+7. I used healthy adults from one data pool, and the held-out sample shares its payoff scheme, so the results may not
+hold for clinical groups or other payoff schemes.
+8. βP_loss is estimated from fewer trials than βP_win (losses are less frequent than gains) and recovered less well
+(r = .83 vs. .90). Many βP estimates sit at the +/- 10 limit (48 βP_win, 31 βP_loss); at the limit, the sign recovers
+but not the size.
+9. Neither ORL nor the variant reproduces how quickly people return to deck B after its big loss (see the exploratory analysis).
+
+
 ## Next steps
 
-- Held-out test of the variant (SteingroverInPrep, N = 70): in progress
+- Cross-validation of the hierarchical ORL and variant on Baylor's Kodiak cluster: first run done (preliminary, see Extension); rerun with longer chains submitted November 5, 2026
 - Lapse-term check: add a random-choice term ε (Shteingart, Neiman & Loewenstein, 2013, Eq. 2) to ORL and the variant, and test whether the win/loss asymmetry survives
-- On Baylor's Kodiak cluster: a hierarchical (Stan) version of the variant; 10-fold cross-validation of the hierarchical models, in place of the unreliable LOOIC; repeated model and parameter recovery (10+ simulated datasets per participant)
+- Repeated model and parameter recovery (10+ simulated datasets per participant), on Kodiak
+- A diminishing-sensitivity version of ORL for the deck-B misfit, with a dated prediction and a held-out test
+- A small recurrent neural network as a benchmark for how much predictable structure the models miss
 - Random-effects model selection (undecided)
-- Comparing against newer models
 
 ## How to run
 
@@ -503,10 +579,17 @@ results are saved to `output/` so later scripts don't refit.
 | `20_stan_wl_test.R` | Tests the hierarchical (Stan) version of the variant on 30 simulated participants | ~20 min |
 | `21_stan_wl_horstmann.R` | Hierarchical (Stan) fit of the ORL variant to all 162 participants | ~2 hours |
 | `21b_stan_wl_summary.R` | Summarizes the hierarchical variant fit: diagnostics, group-level asymmetry, agreement with MLE | seconds |
+| `22_deckB_after_loss.R` | Exploratory: returning to deck B after its big loss, observed vs. simulated from ORL and the variant | minutes |
+| `23_cv_fold.R` | One cross-validation fit of the hierarchical ORL or variant (fold 0–10); run from Terminal, see below | ~2.5–3.3 hours per fit on Kodiak (first run) |
+| `23b_cv_summary.R` | Combines the 22 cross-validation fits: PSIS-LOO comparison, held-out elpd difference with SE, convergence | seconds |
 
 *On an Apple silicon MacBook Air.
 
-Scripts 16 and 20 also need CmdStan, installed separately with `cmdstanr::install_cmdstan()` (version 2.40.0 used here); renv doesn't track it.
+Scripts 16, 20, 21 and 23 also need CmdStan, installed separately with `cmdstanr::install_cmdstan()` (version 2.40.0 used here); renv doesn't track it.
+
+Script 23 takes arguments and runs from the Terminal: `Rscript scripts/23_cv_fold.R orl 3` fits ORL on fold 3
+(use `wl` for the variant; add `quick` for a 10-person test). On Baylor's Kodiak cluster (PBS), `qsub kodiak/cv_array.sh`
+from the project folder runs all 22 fits (2 models × folds 0–10) as a job array, with R 4.5.2.
 
 ## How this project was built
 
@@ -515,7 +598,7 @@ Goals:
 - Understand how scientists use computational methods in research relating to Computational Psychology
 
 Assistance:
-I used Anthropic's Opus 5.5 on Extra as a tutor: it explained the models' equations and R syntax,
+I used Anthropic's Claude (Opus 5.5) as a tutor: it explained the models' equations and R syntax,
 reviewed my code for errors, and helped edit this write-up. I implemented the three models from their published equations
 (Ahn et al., 2008; Worthy, Pang & Byrne, 2013; Haines, Vassileva & Ahn, 2018), following hBayesDM's outcome scaling and consulting
 its ORL code (Ahn, Haines & Zhang, 2017). I wrote and ran the code myself in RStudio.
@@ -529,10 +612,14 @@ its ORL code (Ahn, Haines & Zhang, 2017). I wrote and ran the code myself in RSt
 - Haines, N., Vassileva, J., & Ahn, W.-Y. (2018). The Outcome-Representation Learning model: A novel reinforcement learning model of the Iowa Gambling Task. *Cognitive Science, 42*(8), 2534–2561. https://doi.org/10.1111/cogs.12688
 - Haynes, J. M., Haines, N., Sullivan-Toole, H., & Olino, T. M. (2024). Test-retest reliability of the play-or-pass version of the Iowa Gambling Task. *Cognitive, Affective, & Behavioral Neuroscience, 24*(4), 740–754. https://doi.org/10.3758/s13415-024-01197-6
 - Horstmann, A., Villringer, A., & Neumann, J. (2012). Iowa Gambling Task: There is more to consider than long-term outcome. Using a linear equation model to disentangle the impact of outcome and frequency of gains and losses. *Frontiers in Neuroscience, 6*, 61. https://doi.org/10.3389/fnins.2012.00061
+- Shteingart, H., Neiman, T., & Loewenstein, Y. (2013). The role of first impression in operant learning. *Journal of Experimental Psychology: General, 142*(2), 476–488. https://doi.org/10.1037/a0029550
 - Steingroever, H., Wetzels, R., Horstmann, A., Neumann, J., & Wagenmakers, E.-J. (2013). Performance of healthy participants on the Iowa Gambling Task. *Psychological Assessment, 25*(1), 180–193. https://doi.org/10.1037/a0029929
 - Steingroever, H., et al. (2015). Data from 617 healthy participants performing the Iowa Gambling Task: A "many labs" collaboration. *Journal of Open Psychology Data, 3*(1), e5. https://doi.org/10.5334/jopd.ak
+- Vehtari, A., Gelman, A., & Gabry, J. (2017). Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC. *Statistics and Computing, 27*(5), 1413–1432. https://doi.org/10.1007/s11222-016-9696-4
 - Worthy, D. A., Pang, B., & Byrne, K. A. (2013). Decomposing the roles of perseveration and expected value representation in models of the Iowa Gambling Task. *Frontiers in Psychology, 4*, 640. https://doi.org/10.3389/fpsyg.2013.00640
 
 ## License
 
-MIT License: see `LICENSE`. The data are not included and keep their own OSF license (CC BY-SA 4.0).
+MIT License: see `LICENSE`. The exception is the Stan files in `stan/`: they are modified versions of hBayesDM's
+`igt_orl.stan` and are distributed under the GNU General Public License v3 (GPL-3), as their headers state.
+The data are not included and keep their own OSF license (CC BY-SA 4.0).
