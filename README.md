@@ -447,6 +447,18 @@ from ORL-generated data, so the A_pun reordering seen on Horstmann did not repli
 **Kodiak test prediction**
 I predict that the variant will beat ORL on both fold-LOO and folds 1-10, by more than 2 SE.
 
+**Cross-validation results, first run** (preliminary; November 5, 2026):
+On the numbers, the prediction was met: the variant beat ORL on fold-0 PSIS-LOO by 232.7 elpd (SE 30.5) and on the
+held-out trials of folds 1–10 by 239.2 (SE 43.2), and it led in all 10 folds (by 13.1–37.1 each). The two methods agree
+closely. Only 90 of 162 participants (56%) were better predicted by the variant (one-sided sign test, p = .09), so the
+advantage comes from a subset of people. Pareto k was above 0.7 for 13 of 16,038 trials for ORL and 5 for the variant.
+
+I'm not scoring the prediction yet: several ORL fits did not converge (largest group-level R̂ 1.93 in fold 5, and
+1.23–1.43 in folds 0, 9 and 10), while every variant fit did (R̂ ≤ 1.02). The variant's lead was no larger in the folds
+where ORL failed (folds 5, 9, 10: mean 19.5) than where ORL converged best (folds 2, 3, 4, 6: mean 21.3), so poor ORL
+sampling does not seem to explain it. All 22 fits are being rerun with twice the chain length (2,000 warmup + 2,000 draws),
+and the prediction will be scored on that run. First-run results are in `output/cv_run1/` and `output/cv_summary.rds`.
+
 ## Next steps
 
 - Held-out test of the variant (SteingroverInPrep, N = 70): in progress
