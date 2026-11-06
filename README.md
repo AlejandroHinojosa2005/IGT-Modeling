@@ -12,10 +12,11 @@ and its new parameters recovered well. On a held-out sample of 70 participants,
 with predictions written before fitting, it again beat ORL on AIC (BIC was nearly tied),
 reproduced win-stay/lose-shift where ORL did not, and 81% of participants showed a stronger
 pull toward the last deck after gains than after losses; 4 of 5 predictions were met.
-A hierarchical (Stan) version of the variant shows the same asymmetry at the group level, and a first
-cross-validation run on Baylor's Kodiak cluster favors the variant; it is being rerun because several ORL fits did not converge.
+A hierarchical (Stan) version of the variant shows the same asymmetry at the group level, and in cross-validation of
+the hierarchical models (run on Baylor's Kodiak cluster), the variant predicted held-out choices better than ORL by more
+than 5 SE, meeting a prediction written before the run.
 
-**Status:** Personal learning project, ongoing (last updated November 5, 2026).
+**Status:** Personal learning project, ongoing (last updated November 6, 2026).
 
 ## What's in this repository
 
@@ -28,7 +29,7 @@ win-stay/lose-shift behavior
 - An ORL variant with outcome-dependent perseveration: fits, model recovery against ORL,
 parameter recovery, win-stay/lose-shift check, and a confirmatory test on a held-out sample
 - Hierarchical Bayesian cross-checks: hBayesDM fits of the three original models, and a Stan version of the variant
-- Cross-validation code comparing the hierarchical ORL and variant, with a job script for Baylor's Kodiak cluster
+- Cross-validation of the hierarchical ORL and variant, run on Baylor's Kodiak cluster
 - An exploratory analysis of how people return to deck B after its big loss
 
 ## Background
@@ -463,7 +464,7 @@ had βP_win > βP_loss, compared with 121 (75%) under maximum likelihood, likely
 toward a group mean that is itself asymmetric. Rank agreement with the maximum-likelihood fits (Spearman ρ): A_rew .83,
 A_pun .81, K′ .42, βF .85, βP_win .75, βP_loss .79; as with ORL, K′ agrees least.
 
-**Cross-validation** (hierarchical ORL vs. variant; scripts 23 and 23b; running on Baylor's Kodiak cluster):
+**Cross-validation** (hierarchical ORL vs. variant; scripts 23 and 23b; run on Baylor's Kodiak cluster):
 hBayesDM's LOOIC was unreliable here (see "Hierarchical cross-check"), and AIC and BIC count parameters rather than
 measuring how flexible a model is. So this comparison asks which hierarchical model better predicts choices it wasn't fit to.
 
@@ -474,24 +475,24 @@ choices are left out of the fit.
 - Fold 0: both models are fit to all trials, and per-trial leave-one-out is estimated with PSIS-LOO (Vehtari, Gelman & Gabry, 2017).
 Unlike hBayesDM's LOOIC, it leaves out single trials rather than whole participants, and every Pareto k was good in a
 10-person test run. Trial 1 is dropped, since both models predict it at chance.
-- The first run used 4 chains × 1,000 draws after 1,000 warmup per fit; the rerun doubles both. Differences between the models are summed within participants,
+- Each fit uses 4 chains × 2,000 draws after 2,000 warmup (a first run with half that is kept in `output/cv_run1/`). Differences between the models are summed within participants,
 with the SE computed across participants; 23b also counts how many participants each model predicts better and checks
 convergence for every fit.
 
 **Cross-validation prediction** (written November 4, 2026, before the full run was submitted):
 "I predict that the variant will beat ORL on both fold-LOO and folds 1-10, by more than 2 SE."
 
-**Cross-validation results, first run** (preliminary; November 5, 2026):
-On the numbers, the prediction was met: the variant beat ORL on fold-0 PSIS-LOO by 232.7 elpd (SE 30.5) and on the
-held-out trials of folds 1–10 by 239.2 (SE 43.2), and it led in all 10 folds (by 13.1–37.1 each). The two methods agree
-closely. Only 90 of 162 participants (56%) were better predicted by the variant (one-sided sign test, p = .09), so the
-advantage comes from a subset of people. Pareto k was above 0.7 for 13 of 16,038 trials for ORL and 5 for the variant.
+**Cross-validation results** (scored November 6, 2026): **prediction met.**
+The variant beat ORL on fold-0 PSIS-LOO by 232.2 elpd (SE 30.8, about 7.5 SE) and on the held-out trials of folds 1–10
+by 242.6 (SE 43.7, about 5.6 SE). It led in all 10 folds (by 13.0–36.3 each), and the two methods agree. The advantage
+is not spread evenly: 92 of 162 participants (57%) were better predicted by the variant (one-sided sign test, p = .049).
+Pareto k was above 0.7 for 11 of 16,038 trials for ORL and 2 for the variant.
 
-I'm not scoring the prediction yet: several ORL fits did not converge (largest group-level R̂ 1.93 in fold 5, and
-1.23–1.43 in folds 0, 9 and 10), while every variant fit did (R̂ ≤ 1.02). The variant's lead was no larger in the folds
-where ORL failed (folds 5, 9, 10: mean 19.5) than where ORL converged best (folds 2, 3, 4, 6: mean 21.3), so poor ORL
-sampling does not seem to explain it. All 22 fits are being rerun with twice the chain length (2,000 warmup + 2,000 draws),
-and the prediction will be scored on that run. First-run results are in `output/cv_run1/` and `output/cv_summary.rds`.
+One caveat: every variant fit converged (R̂ ≤ 1.01), but ORL did not fully converge in several folds even with twice the
+chain length (group-level R̂ above 1.05 in folds 0, 1, 5, 6, 7, 8 and 9; largest 1.27, fold 8). This does not seem to drive
+the result. ORL's convergence changed a lot between a first run with half the chain length and this one (fold 5: R̂ 1.93
+→ 1.14; fold 8: 1.07 → 1.27), but the variant's advantage in each fold barely moved (fold 5: 30.9 → 32.0; fold 8:
+37.1 → 36.3), and the totals matched (folds 1–10: 239.2 → 242.6; PSIS-LOO: 232.7 → 232.2).
 
 ## Exploratory: returning to deck B after its big loss
 
@@ -520,10 +521,11 @@ would need to test on held-out data.
 (Steingroever et al., 2013; here, the winning decks received only 50.6% of all choices), but we still use
 it regularly to assess decision-making deficits. This should make us question our belief in the test's validity.
 2. My main comparisons and the held-out test used per-participant maximum likelihood. The hierarchical fits
-(hBayesDM and the Stan variant) are cross-checks, and the hierarchical comparison by cross-validation is still running.
+(hBayesDM and the Stan variant) are cross-checks, and in the hierarchical cross-validation ORL did not fully converge in
+several folds (see Extension).
 3. I only refit perseveration parameters with wider limits; there were cases (e.g., VPP λ and A) that were not rechecked.
 4. The simulator function used draws outcomes at random from each deck rather than using the task's actual card sequence.
-5. AIC & BIC count parameters rather than assessing the model's actual flexibility; the cross-validation is meant to address this.
+5. AIC & BIC count parameters rather than assessing the model's actual flexibility; the cross-validation addresses this.
 6. Model recovery used one simulated dataset per participant, and BIC could not reliably recover VPP,
 so BIC-based conclusions about VPP should be read cautiously.
 7. I used healthy adults from one data pool, and the held-out sample shares its payoff scheme, so the results may not
@@ -536,7 +538,7 @@ but not the size.
 
 ## Next steps
 
-- Cross-validation of the hierarchical ORL and variant on Baylor's Kodiak cluster: first run done (preliminary, see Extension); rerun with longer chains submitted November 5, 2026
+- Find out why the hierarchical ORL mixes poorly in some cross-validation folds while the variant converges in all
 - Lapse-term check: add a random-choice term ε (Shteingart, Neiman & Loewenstein, 2013, Eq. 2) to ORL and the variant, and test whether the win/loss asymmetry survives
 - Repeated model and parameter recovery (10+ simulated datasets per participant), on Kodiak
 - A diminishing-sensitivity version of ORL for the deck-B misfit, with a dated prediction and a held-out test
@@ -580,7 +582,7 @@ results are saved to `output/` so later scripts don't refit.
 | `21_stan_wl_horstmann.R` | Hierarchical (Stan) fit of the ORL variant to all 162 participants | ~2 hours |
 | `21b_stan_wl_summary.R` | Summarizes the hierarchical variant fit: diagnostics, group-level asymmetry, agreement with MLE | seconds |
 | `22_deckB_after_loss.R` | Exploratory: returning to deck B after its big loss, observed vs. simulated from ORL and the variant | minutes |
-| `23_cv_fold.R` | One cross-validation fit of the hierarchical ORL or variant (fold 0–10); run from Terminal, see below | ~2.5–3.3 hours per fit on Kodiak (first run) |
+| `23_cv_fold.R` | One cross-validation fit of the hierarchical ORL or variant (fold 0–10); run from Terminal, see below | ~4–6 hours per fit on Kodiak |
 | `23b_cv_summary.R` | Combines the 22 cross-validation fits: PSIS-LOO comparison, held-out elpd difference with SE, convergence | seconds |
 
 *On an Apple silicon MacBook Air.
