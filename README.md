@@ -515,6 +515,32 @@ followed by a sharp return; the avoidance here was no deeper than ORL's. One can
 less sensitive to large, rare losses than ORL assumes (diminishing sensitivity, like PVL-Delta's α), which a new model
 would need to test on held-out data.
 
+## Extension 2: diminishing sensitivity (planned)
+
+**Plan and predictions** (written November 7, 2026, before any fitting):
+ORL and the variant weigh outcomes in proportion to their size, so deck B's rare −1,150 loss counts 11.5 times as much
+as a −100 loss and pushes deck B's value far down. People return to deck B faster than either model predicts
+(exploratory analysis above), which suggests they weigh large outcomes less than in proportion: frequent small gains
+outweigh a rare large loss more than the models allow.
+
+**Model:** the variant plus one parameter borrowed from PVL-Delta, α (0.01–2). Each outcome x (in hundreds) becomes
+u = sign(x)·|x|^α before the expected-value update; win frequency and perseveration are unchanged. α = 1 is the
+variant; α < 1 is diminishing sensitivity. ORL + α is fit for comparison.
+
+**Predictions** (Horstmann sample; exploratory, since this sample motivated the model):
+1. α < 1 for most participants: more than half below 1 (one-sided sign test, p < .05) and median α < 1.
+2. The variant + α reproduces the return to deck B: over trials 2–10 after a big B loss, the observed-minus-simulated
+   gap is at most half the variant's.
+3. Summed AIC favors the variant + α over the variant. BIC is reported either way; I expect it to be close, since only
+   a few trials per person follow a big loss.
+4. α recovers acceptably (true vs. recovered r ≥ .70), and no other parameter's recovery drops more than .10 below
+   the variant's.
+5. The variant's gains hold: βP_win > βP_loss for at least two-thirds of participants, and simulated win-stay/lose-shift
+   still matches the observed (paired t-test, p > .05).
+
+If prediction 1 fails (α ≈ 1), diminishing sensitivity doesn't explain the deck-B return, and the loss-spacing account
+becomes the next candidate. A confirmatory test on fresh studies from the 617-person pool is planned for a later paper.
+
 ## Limitations
 
 1. There are issues of heterogeneity: many healthy participants never learn to favor the winning decks
