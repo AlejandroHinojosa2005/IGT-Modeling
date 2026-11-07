@@ -8,3 +8,4 @@ Rplots.pdf
 stan/*
 !stan/*.stanstan/*
 !stan/*.stan
+echo '*_quick.rds' >> .gitignore
