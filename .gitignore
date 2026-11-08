@@ -6,6 +6,5 @@ data-raw/
 .DS_Store
 Rplots.pdf
 stan/*
-!stan/*.stanstan/*
 !stan/*.stan
-echo '*_quick.rds' >> .gitignore
+*_quick.rds

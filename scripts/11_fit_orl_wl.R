@@ -50,11 +50,11 @@ sum(orl$nll - results_orl_wl$nll > 1)              # variant wins vs. ORL, AIC
 sum(orl$nll - results_orl_wl$nll > log(100) / 2)   # variant wins vs. ORL, BIC
 sum(results_orl_wl$betaPw > results_orl_wl$betaPl) # prediction 2
 
-# Test ran that asked if weather spiting perspiration leaves ORL's other parameters unchanged
-# Shows that A_pun is absorbing the switching after losses
+# Does splitting perseveration change ORL's other parameters? 
+# (whether A_pun absorbs post-loss switching: see the baseline comparison below)
 p <- c("Arew", "Apun", "Kprime", "betaF")
-round(diag(cor(orl[, p], wl[, p])), 2)          # same people: does each parameter keep its ranking?
-round(colMeans(wl[, p]) - colMeans(orl[, p]), 2) # average shift
+round(diag(cor(orl[, p], results_orl_wl[, p])), 2)          # same people: does each parameter keep its ranking?
+round(colMeans(results_orl_wl[, p]) - colMeans(orl[, p]), 2) # average shift
 
 # Did the people whose A_pun dropped most have the strongest push away after losses?
 p <- c("Arew", "Apun", "Kprime", "betaF")

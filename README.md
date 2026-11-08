@@ -541,6 +541,47 @@ variant; α < 1 is diminishing sensitivity. ORL + α is fit for comparison.
 If prediction 1 fails (α ≈ 1), diminishing sensitivity doesn't explain the deck-B return, and the loss-spacing account
 becomes the next candidate. A confirmatory test on fresh studies from the 617-person pool is planned for a later paper.
 
+## Extension 3: newer models (planned)
+
+**Plan and predictions** (written November 7, 2026, before any fitting):
+The comparisons above used models from 2008–2018. I only learned of two newer models after those analyses: VSE
+(Ligneul, 2019) and EEF (Yang, Xie & Wang, 2025). Both were developed on the many-labs pool that contains the Horstmann
+data, VSE beat ORL on that pool (Ligneul, 2019), and it beat ORL on the Horstmann data specifically in Janbesaraei et al.
+(2025). Beating ORL means less if ORL is no longer the best available model, so the variant is compared with these
+models, and its mechanism is tested inside VSE.
+
+**Models** (written from the published equations; same fitting as above: maximum likelihood, 20 starts, outcomes ÷ 100):
+- **VSE (5 parameters):** value sensitivity θ (0–1), applied separately to each trial's gain and loss; decay Δ (0–1) of
+  the exploitation weights; exploration learning rate α (0–1); exploration bonus φ (−10 to 10); consistency β (0–5).
+  Exploitation weights are a decaying sum of outcomes. Exploration weights ignore outcomes: the chosen deck's resets to 0
+  and the others drift toward φ. Following Ligneul's toolbox, exploration weights start at φ (the paper's text says 1).
+- **VSE-split (6):** VSE, but after a net loss the chosen deck's exploration weight resets to ψ (−10 to 10) instead of
+  0; ψ = 0 is VSE. This puts the variant's idea, outcome-dependent perseveration, inside VSE: ψ < 0 means people return
+  to a deck less after a loss than value learning alone predicts (the same direction as βP_win > βP_loss). A net
+  outcome of 0 counts as a gain, as in the variant. Same parameter count as the variant.
+- **EEF (4):** θ, forgetting λ (0–1), φ (−5 to 5), β. VSE with Δ = α = 1 − λ; exploitation weights start at the
+  paper's first-choice weights and exploration weights at 0.
+- **WSLS (2):** P(stay | net gain ≥ 0) and P(shift | net loss), with shifts spread evenly over the other three decks
+  (Worthy, Hawthorne & Otto, 2013).
+
+**Predictions** (Horstmann sample):
+1. VSE beats ORL on summed AIC.
+2. The split improves VSE: VSE-split beats VSE on summed AIC, and ψ < 0 for most participants (one-sided sign test,
+   p < .05; ψ = 0 counts against).
+3. VSE under-produces win-stay/lose-shift (simulated below observed, paired t-test, p < .05), and VSE-split reproduces
+   it (95% CI of the paired difference includes 0).
+4. VSE reproduces the return to deck B: over trials 2–10 after a big B loss, the observed-minus-simulated gap, in
+   absolute value, is at most half the variant's (0.055). VSE's exploration weights pull decks people have stopped
+   choosing back toward φ, which the variant lacks.
+5. VSE and VSE-split reproduce the sequential-exploration index (the share of 4-trial windows in which all four decks
+   are chosen; Ligneul, 2019) better than the variant: smaller mean |observed − simulated|.
+6. ψ recovers acceptably (true vs. recovered r ≥ .70).
+
+Not predicted, reported either way: the variant vs. VSE, EEF vs. VSE, the WSLS model, and BIC for every comparison.
+
+If prediction 2 fails, the variant's gain over ORL may reflect something ORL lacks (such as directed exploration) rather
+than a general feature of how people play the task. If it holds, the mechanism survives in the strongest current model.
+
 ## Limitations
 
 1. There are issues of heterogeneity: many healthy participants never learn to favor the winning decks
@@ -640,11 +681,15 @@ its ORL code (Ahn, Haines & Zhang, 2017). I wrote and ran the code myself in RSt
 - Haines, N., Vassileva, J., & Ahn, W.-Y. (2018). The Outcome-Representation Learning model: A novel reinforcement learning model of the Iowa Gambling Task. *Cognitive Science, 42*(8), 2534–2561. https://doi.org/10.1111/cogs.12688
 - Haynes, J. M., Haines, N., Sullivan-Toole, H., & Olino, T. M. (2024). Test-retest reliability of the play-or-pass version of the Iowa Gambling Task. *Cognitive, Affective, & Behavioral Neuroscience, 24*(4), 740–754. https://doi.org/10.3758/s13415-024-01197-6
 - Horstmann, A., Villringer, A., & Neumann, J. (2012). Iowa Gambling Task: There is more to consider than long-term outcome. Using a linear equation model to disentangle the impact of outcome and frequency of gains and losses. *Frontiers in Neuroscience, 6*, 61. https://doi.org/10.3389/fnins.2012.00061
+- Janbesaraei, S. N., Hadian Rasanan, A. H., Nejati, V., & Amani Rad, J. (2025). Do human reinforcement learning models account for key experimental choice patterns in the Iowa Gambling Task? *Computational Brain & Behavior, 8*, 286–320. https://doi.org/10.1007/s42113-024-00228-2
+- Ligneul, R. (2019). Sequential exploration in the Iowa gambling task: Validation of a new computational model in a large dataset of young and old healthy participants. *PLOS Computational Biology, 15*(6), e1006989. https://doi.org/10.1371/journal.pcbi.1006989
 - Shteingart, H., Neiman, T., & Loewenstein, Y. (2013). The role of first impression in operant learning. *Journal of Experimental Psychology: General, 142*(2), 476–488. https://doi.org/10.1037/a0029550
 - Steingroever, H., Wetzels, R., Horstmann, A., Neumann, J., & Wagenmakers, E.-J. (2013). Performance of healthy participants on the Iowa Gambling Task. *Psychological Assessment, 25*(1), 180–193. https://doi.org/10.1037/a0029929
 - Steingroever, H., et al. (2015). Data from 617 healthy participants performing the Iowa Gambling Task: A "many labs" collaboration. *Journal of Open Psychology Data, 3*(1), e5. https://doi.org/10.5334/jopd.ak
 - Vehtari, A., Gelman, A., & Gabry, J. (2017). Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC. *Statistics and Computing, 27*(5), 1413–1432. https://doi.org/10.1007/s11222-016-9696-4
+- Worthy, D. A., Hawthorne, M. J., & Otto, A. R. (2013). Heterogeneity of strategy use in the Iowa gambling task: A comparison of win-stay/lose-shift and reinforcement learning models. *Psychonomic Bulletin & Review, 20*(2), 364–371. https://doi.org/10.3758/s13423-012-0324-9
 - Worthy, D. A., Pang, B., & Byrne, K. A. (2013). Decomposing the roles of perseveration and expected value representation in models of the Iowa Gambling Task. *Frontiers in Psychology, 4*, 640. https://doi.org/10.3389/fpsyg.2013.00640
+- Yang, T., Xie, C., & Wang, X. (2025). Forgetting phenomena in the Iowa Gambling Task: A new computational model among diverse participants. *Frontiers in Psychology, 16*, 1510151. https://doi.org/10.3389/fpsyg.2025.1510151
 
 ## License
 
