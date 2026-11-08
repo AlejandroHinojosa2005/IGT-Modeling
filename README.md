@@ -582,6 +582,18 @@ Not predicted, reported either way: the variant vs. VSE, EEF vs. VSE, the WSLS m
 If prediction 2 fails, the variant's gain over ORL may reflect something ORL lacks (such as directed exploration) rather
 than a general feature of how people play the task. If it holds, the mechanism survives in the strongest current model.
 
+
+## Cross-validated comparison (planned)
+
+**Plan and predictions** (written November 8, 2026, before running):
+AIC and BIC disagree about which model is best (AIC: the variant + α; BIC: EEF), so the models are compared on how well
+they predict choices they were not fit to. Each participant's model is fit by maximum likelihood to 90% of their trials
+and scored on the other 10%, over 10 folds (the same folds as the Stan cross-validation; trial 1 is never held out;
+same limits as the main fits). Models: ORL, the variant, ORL + α, the variant + α, VSE, VSE-split, EEF, and WSLS.
+
+1. VSE-split predicts held-out choices best (highest total held-out log-likelihood).
+2. VSE-split beats VSE by more than 2 SE (the split, tested on held-out choices).
+
 ## Limitations
 
 1. There are issues of heterogeneity: many healthy participants never learn to favor the winning decks
