@@ -78,3 +78,41 @@ data.frame(prediction = 1:2, met = c(pred1, pred2), row.names = NULL)
 
 saveRDS(list(ll = ll, table = tab, pairs = pairs, met = c(pred1, pred2)),
         sprintf("output/cv_mle_summary%s.rds", tag))
+
+# Sensitivity (added after scoring, not part of the predictions): a few participants were predicted
+# catastrophically by the VSE models in single folds. Chance for a fold's ~10 held-out choices is about -14
+# (10 * log(1/4)); ORL-family folds never fell below -66. VSE, VSE-split and EEF multiply their weights by a
+# consistency term (up to 3^5 - 1 = 242), so a person whose training choices are almost perfectly predictable
+# gets a near-certain model, and one unexpected held-out choice can score in the thousands.
+# Same comparison without the participants who had any fold below -100 in any model (cutoff chosen after seeing
+# the results), applied to every model alike.
+fold_ll <- function(m) sapply(1:10, function(f)
+  readRDS(sprintf("output/cv_mle/%s_fold%02d%s.rds", m, f, tag))$heldout_ll)
+worst <- sapply(models, function(m) apply(fold_ll(m), 1, min))   # each participant's worst fold, per model
+round(apply(worst, 2, min), 1)                                   # worst single fold anywhere, per model
+bad <- which(apply(worst, 1, min) < -100)
+bad                                                              # participants left out
+ll_s <- ll[-bad, ]
+n_s <- nrow(ll_s)
+tot_s <- colSums(ll_s)
+best_s <- names(which.max(tot_s))
+tab_s <- data.frame(heldout_ll = round(tot_s, 1),
+                    diff_vs_best = round(tot_s - tot_s[best_s], 1),
+                    se = round(apply(ll_s, 2, function(x) sd(x - ll_s[, best_s]) * sqrt(n_s)), 1),
+                    median_person = round(apply(ll_s, 2, median), 1))
+tab_s[order(-tab_s$heldout_ll), ]
+pair_s <- function(a, b) {
+  d <- ll_s[, a] - ll_s[, b]
+  c(diff = sum(d), se = sd(d) * sqrt(n_s), z = sum(d) / (sd(d) * sqrt(n_s)), first_better_for = sum(d > 0))
+}
+pairs_s <- rbind(`vse_split - vse` = pair_s("vse_split", "vse"),
+                 `variant - orl` = pair_s("variant", "orl"),
+                 `orl_alpha - orl` = pair_s("orl_alpha", "orl"),
+                 `variant_alpha - orl_alpha` = pair_s("variant_alpha", "orl_alpha"),
+                 `orl_alpha - vse` = pair_s("orl_alpha", "vse"),
+                 `vse - orl` = pair_s("vse", "orl"),
+                 `eef - vse` = pair_s("eef", "vse"))
+round(pairs_s, 1)
+
+saveRDS(list(left_out = bad, worst_fold = apply(worst, 2, min), table = tab_s, pairs = pairs_s),
+        sprintf("output/cv_mle_sensitivity%s.rds", tag))

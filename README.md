@@ -16,7 +16,15 @@ A hierarchical (Stan) version of the variant shows the same asymmetry at the gro
 the hierarchical models (run on Baylor's Kodiak cluster), the variant predicted held-out choices better than ORL by more
 than 5 SE, meeting a prediction written before the run.
 
-**Status:** Personal learning project, ongoing (last updated November 6, 2026).
+Later extensions, each with predictions written before fitting, changed the picture. Adding diminishing sensitivity
+(α, the utility curvature PVL uses and ORL dropped) improved ORL's fit more than the win/loss split did, and once α was
+in, the split no longer improved prediction of held-out choices. I also compared the variant with two newer models, VSE
+(Ligneul, 2019) and EEF (Yang, Xie & Wang, 2025), and put the variant's split inside VSE. In a cross-validation of eight
+models, ORL + α predicted held-out choices best, statistically tied with the variant with and without α; VSE and EEF
+came close for most participants but broke down for a few very consistent ones. Across these extensions, 5 of 13
+predictions were met.
+
+**Status:** Personal learning project, ongoing (last updated November 11, 2026).
 
 ## What's in this repository
 
@@ -31,6 +39,11 @@ parameter recovery, win-stay/lose-shift check, and a confirmatory test on a held
 - Hierarchical Bayesian cross-checks: hBayesDM fits of the three original models, and a Stan version of the variant
 - Cross-validation of the hierarchical ORL and variant, run on Baylor's Kodiak cluster
 - An exploratory analysis of how people return to deck B after its big loss
+- Robustness checks for the variant: a lapse term, repeated model and parameter recovery, and a diagnosis of the
+hierarchical ORL's poor mixing
+- A diminishing-sensitivity extension (ORL + α and the variant + α), with recovery and a null check
+- Newer models (VSE, EEF, a win-stay/lose-shift model) and VSE with the variant's win/loss split
+- A maximum-likelihood cross-validation of eight models, run on Kodiak
 
 ## Background
 
@@ -494,6 +507,28 @@ the result. ORL's convergence changed a lot between a first run with half the ch
 → 1.14; fold 8: 1.07 → 1.27), but the variant's advantage in each fold barely moved (fold 5: 30.9 → 32.0; fold 8:
 37.1 → 36.3), and the totals matched (folds 1–10: 239.2 → 242.6; PSIS-LOO: 232.7 → 232.2).
 
+**Robustness checks** (scripts 24–26 and their summaries; run on Kodiak; not predicted):
+- *Lapse term.* I added a random-choice rate ε (Shteingart, Neiman & Loewenstein, 2013) to both models. The median
+lapse rate was .09 for ORL and .03 for the variant (79 participants above .05 with the variant). The win/loss asymmetry
+survived: βP_win > βP_loss for 108 of 162 participants (67%; one-sided sign test, p < .001; 121 without ε), and each
+person's split stayed similar (Spearman ρ = .62). With ε in both, the variant still beat ORL on AIC (32,704 vs. 32,831)
+but not on BIC (35,658 vs. 35,364). At equal parameter counts, splitting perseveration did more than a lapse term: the
+variant (6 parameters) beat ORL + ε (6) by about 113 on both AIC and BIC.
+- *Repeated recovery.* I repeated model and parameter recovery with 10 simulated datasets per participant. The single
+run was representative: when ORL generated the data, the variant still won for 20% of simulated participants on AIC
+(range 17–27%) and 4% on BIC (2.5–6%); when the variant generated the data, it won for 56% (AIC) and 41% (BIC). Summed
+AIC and BIC picked the generating model in all 10 replicates. The real data's margins (variant ahead by 381 on AIC,
+behind by 41 on BIC) fall between the two simulated worlds (ORL world: ORL ahead by 106–149 on AIC and 528–571 on BIC;
+variant world: variant ahead by 513–750 and 91–328), which fits a mix of participants, some with the split and some
+without. Variant parameter recovery averaged r = .83 (A_rew), .79 (A_pun), .62 (K′), .82 (βF), .90 (βP_win) and .80
+(βP_loss); the split's sign was recovered for 82% of participants (77–86% across replicates).
+- *Why the hierarchical ORL mixes poorly.* Refitting ORL on folds 0 and 8 with saved draws, the worst group-level
+parameters were K′'s (R̂ 1.11–1.27, effective sample sizes 11–26), and a few participants' chains disagreed about K′
+and βP together. For participant 130, one chain settled on K′ ≈ 0 with βP ≈ −7 and two others on K′ ≈ 1.5 with
+βP ≈ +5.7. Four of the five worst-mixing participants sat at the βP limit (−10) with K′ near 0 in the single-person ORL
+fits: a fast-fading trace with a strong weight trades off against a slower one with a weaker weight. The variant
+converged in every fold; that its two traces' shared decay avoids this ridge is my interpretation, not something I tested.
+
 ## Exploratory: returning to deck B after its big loss
 
 *Not predicted (script 22).* Deck B's rare −1,150 net loss is the task's most dramatic outcome, so I looked at how people
@@ -513,9 +548,10 @@ So the models get the immediate avoidance about right, but in the models the los
 in people. This doesn't look like latent-state inference ("deck B has changed"), which would predict deeper avoidance
 followed by a sharp return; the avoidance here was no deeper than ORL's. One candidate explanation is that people are
 less sensitive to large, rare losses than ORL assumes (diminishing sensitivity, like PVL-Delta's α), which a new model
-would need to test on held-out data.
+would need to test on held-out data. (Tested in Extension 2: diminishing sensitivity did not close the gap. VSE, in
+Extension 3, narrowed it but not by half.)
 
-## Extension 2: diminishing sensitivity (planned)
+## Extension 2: diminishing sensitivity
 
 **Plan and predictions** (written November 7, 2026, before any fitting):
 ORL and the variant weigh outcomes in proportion to their size, so deck B's rare −1,150 loss counts 11.5 times as much
@@ -541,7 +577,28 @@ variant; α < 1 is diminishing sensitivity. ORL + α is fit for comparison.
 If prediction 1 fails (α ≈ 1), diminishing sensitivity doesn't explain the deck-B return, and the loss-spacing account
 becomes the next candidate. A confirmatory test on fresh studies from the 617-person pool is planned for a later paper.
 
-## Extension 3: newer models (planned)
+**Results** (scripts 27–30 and 29b; scored November 7, 2026): **2 of 5 met.**
+1. Met: α < 1 for 130 of 162 participants (80%; one-sided sign test, p < .001), median α = .39; 39 sat at the lower
+limit (.01). Because individual α recovered poorly (prediction 4), I also checked the sign test's assumption with a null
+simulation (script 29b): data simulated from each participant's fitted variant, so α = 1 for everyone, then refit. Even
+then, 89 of 162 estimates (55%) fell below 1 and 19 (12%) at the limit, so the fitting leans slightly below 1, but the
+observed 80% and 24% exceed those rates (binomial tests against them, p < .001 for both).
+2. Not met: the deck-B gap did not shrink (0.062 with α vs. 0.055 without; it needed to be at most 0.027). The two
+models' curves were nearly identical, so diminishing sensitivity does not explain the fast return to deck B.
+3. Met on AIC: 32,456 vs. 32,718. BIC favored the variant without α (35,250 vs. 35,411). α improved AIC for 79
+participants and BIC for 43.
+4. Not met: α recovered at r = .57. The other parameters stayed within .10 of the variant's recovery (A_rew .84, A_pun
+.79, K′ .57, βF .83, βP_win .90, βP_loss .81, vs. .86, .85, .65, .82, .90, .83).
+5. Not met, narrowly: βP_win > βP_loss for 103 participants (two-thirds would be 108; 121 without α). Simulated
+win-stay/lose-shift still matched the observed (paired t-test, p = .056), now slightly above it.
+
+**Not predicted:** at equal parameter counts, ORL + α (6 parameters) beat the variant (6) on both AIC (32,586 vs. 32,718)
+and BIC (35,118 vs. 35,250). The split still improved AIC on top of α (variant + α 32,456 vs. ORL + α 32,586), but by
+less than without α (130 vs. 381), and BIC favored ORL + α. So curvature and the split capture partly the same choices;
+the cross-validation below tests this on held-out choices. α is the same kind of curvature as PVL's shape parameter and
+VSE's θ (Ligneul, 2019).
+
+## Extension 3: newer models
 
 **Plan and predictions** (written November 7, 2026, before any fitting):
 The comparisons above used models from 2008–2018. I only learned of two newer models after those analyses: VSE
@@ -582,8 +639,48 @@ Not predicted, reported either way: the variant vs. VSE, EEF vs. VSE, the WSLS m
 If prediction 2 fails, the variant's gain over ORL may reflect something ORL lacks (such as directed exploration) rather
 than a general feature of how people play the task. If it holds, the mechanism survives in the strongest current model.
 
+**Results** (scripts 31–34 and 32b; scored November 8, 2026): **3 of 6 met.**
 
-## Cross-validated comparison (planned)
+| Model | Parameters | Summed AIC | Summed BIC | Best AIC (people) | Best BIC (people) |
+|---|---|---|---|---|---|
+| Variant + α | 7 | 32,456 | 35,411 | 16 | 4 |
+| ORL + α | 6 | 32,586 | 35,118 | 24 | 9 |
+| VSE-split | 6 | 32,656 | 35,188 | 20 | 6 |
+| Variant | 6 | 32,718 | 35,250 | 24 | 10 |
+| VSE | 5 | 32,935 | 35,046 | 18 | 17 |
+| EEF | 4 | 33,091 | 34,780 | 20 | 46 |
+| ORL | 5 | 33,099 | 35,209 | 16 | 20 |
+| VPP | 8 | 33,190 | 36,566 | 15 | 3 |
+| WSLS | 2 | 35,931 | 36,775 | 7 | 34 |
+| PVL-Delta | 4 | 36,730 | 38,418 | 2 | 13 |
+
+1. Met: VSE beat ORL on AIC (32,935 vs. 33,099), and on BIC (35,046 vs. 35,209).
+2. Met: VSE-split beat VSE on AIC (32,656 vs. 32,935), and ψ < 0 for 114 of 162 participants (70%; sign test,
+p < .001; median ψ = −0.82). BIC favored VSE (35,046 vs. 35,188). When data were simulated from VSE (script 33), the
+split was wrongly picked for 20% of participants on AIC and 8% on BIC, and ψ < 0 for 42%; in the real data it was
+picked for 46% (75) and 27% (43).
+3. Not met, both halves: VSE did not under-produce win-stay/lose-shift (simulated 0.285 vs. observed 0.296, p = .33),
+and VSE-split over-produced it (0.322; 95% CI of the difference [−0.040, −0.012]). So ORL's win-stay/lose-shift miss is
+specific to ORL, not a gap every value-learning model has.
+4. Not met, narrowly: VSE's deck-B gap was 0.033 (needed ≤ 0.027), smaller than the variant's 0.055 but still above zero
+(p = .018). EEF's was 0.030.
+5. Met: every model under-produced sequential exploration (observed SE index 0.089; ORL and the variant 0.055, VSE
+0.066, VSE-split 0.065, EEF 0.059), but VSE and VSE-split came closest (mean absolute error 0.034 vs. 0.041 for the
+variant).
+6. Not met, narrowly: ψ recovered at r = .66 (θ .66, Δ .90, α .82, φ .84, β .90).
+
+**Not predicted:** the variant beat VSE on AIC by 217 and lost on BIC by 205; 93 of 162 participants were fit better by
+the variant (AIC). EEF lost to VSE on AIC by 156 and beat it on BIC by 266, with the best BIC overall.
+
+**Parameter limits:** φ sat at its ±10 limit for 53 VSE fits, φ or ψ for 72 VSE-split fits, and φ at ±5 for 49 EEF
+fits, mostly in participants with low consistency (median β .27 vs. .78), whose exploration bonus must be large to
+matter. Refitting those participants with limits 5× wider (script 32b) improved summed AIC by 15 (VSE), 52 (VSE-split)
+and 97 (EEF), did not change the ranking, and left ψ < 0 for 116 participants. Some estimates moved to the new limits
+too, so this is a ridge rather than a missed optimum. L-BFGS-B stopped early (code 52) for 3 VSE, 8 VSE-split and 8 EEF
+fits; each is still the best of 20 starts.
+
+
+## Cross-validated comparison
 
 **Plan and predictions** (written November 8, 2026, before running):
 AIC and BIC disagree about which model is best (AIC: the variant + α; BIC: EEF), so the models are compared on how well
@@ -594,6 +691,60 @@ limits widened for every model, since the limit checks showed each family gains 
 1. VSE-split predicts held-out choices best (highest total held-out log-likelihood).
 2. VSE-split beats VSE by more than 2 SE (the split, tested on held-out choices).
 
+**Results** (scripts 35 and 35b; 70 fits run on Baylor's Kodiak cluster; scored November 11, 2026): **neither
+prediction met.**
+
+| Model | Held-out log-likelihood | Difference from best (SE) | Best for (people) |
+|---|---|---|---|
+| ORL + α | −16,455.5 | — | 34 |
+| Variant + α | −16,455.7 | −0.3 (66.3) | 15 |
+| Variant | −16,488.7 | −33.2 (97.6) | 16 |
+| ORL | −16,684.1 | −228.6 (89.4) | 23 |
+| WSLS | −17,766.6 | −1,311.1 (155.1) | 12 |
+| VSE-split | −20,021.0 | −3,565.5 (2,459.4) | 17 |
+| EEF | −20,282.1 | −3,826.7 (3,564.6) | 20 |
+| VSE | −23,615.6 | −7,160.2 (6,036.0) | 25 |
+
+1. Not met: ORL + α predicted best, statistically tied with the variant + α and the variant.
+2. Not met: VSE-split beat VSE by 3,594.6 (SE 6,113.9; z = 0.6) and predicted better for only 64 participants.
+
+The VSE-family totals are driven by a few participants. A held-out fold has about 10 choices, so chance is about −14;
+ORL-family folds never fell below −66, but VSE, VSE-split and EEF each had single folds scoring in the thousands (worst:
+−6,044 for VSE). These models multiply their weights by a consistency term that can reach 242, so when a participant's
+training choices are almost perfectly predictable (participant 69: training negative log-likelihood 1.4 over 90
+choices), the model becomes nearly certain, and one unexpected held-out choice costs thousands. This happened within
+the original limits, so widening them did not cause it.
+
+**Sensitivity** (added after scoring): the same comparison without the 5 participants who had any fold below −100 in
+any model (a cutoff chosen after seeing the results), applied to every model:
+
+| Model | Held-out log-likelihood | Difference from best (SE) |
+|---|---|---|
+| ORL + α | −16,146.2 | — |
+| Variant + α | −16,159.4 | −13.1 (65.9) |
+| Variant | −16,191.6 | −45.3 (96.8) |
+| EEF | −16,274.3 | −128.0 (113.1) |
+| VSE | −16,333.7 | −187.4 (120.5) |
+| ORL | −16,373.2 | −227.0 (88.4) |
+| VSE-split | −16,384.7 | −238.4 (143.6) |
+| WSLS | −17,470.0 | −1,323.8 (151.6) |
+
+Key comparisons on these 157 participants (positive = the first model predicts better):
+- Variant vs. ORL: +181.6 (SE 61.4, z = 3.0), better for 74 participants (all 162: +195.4, z = 3.1), in line with the
+Stan cross-validation.
+- ORL + α vs. ORL: +227.0 (SE 88.4, z = 2.6).
+- Variant + α vs. ORL + α: −13.1 (SE 65.9, z = −0.2): once α is in, the split adds nothing to prediction.
+- VSE-split vs. VSE: −51.0 (SE 123.7, z = −0.4): the split's AIC gain in VSE did not carry over to held-out choices.
+- ORL + α vs. VSE: +187.4 (SE 120.5, z = 1.6). VSE vs. ORL: +39.5 (SE 103.3, z = 0.4). EEF vs. VSE: +59.4 (SE 74.2,
+z = 0.8).
+
+**What this changes:** the variant's improvement over ORL holds on held-out choices, but diminishing sensitivity predicts
+at least as well and makes the split redundant. On this sample, the best predictor is ORL + α (to my knowledge,
+curvature has not been added to ORL before; VSE uses a similar exponent θ in a different model). VSE and EEF are
+competitive for most participants but can become overconfident for highly consistent ones. Gains are concentrated in
+subsets of participants (the variant beat ORL for only 74 of 157), which points to people using different strategies.
+All of this comes from one sample; other studies are needed before any claim about which model is best in general.
+
 ## Limitations
 
 1. There are issues of heterogeneity: many healthy participants never learn to favor the winning decks
@@ -601,7 +752,8 @@ limits widened for every model, since the limit checks showed each family gains 
 it regularly to assess decision-making deficits. This should make us question our belief in the test's validity.
 2. My main comparisons and the held-out test used per-participant maximum likelihood. The hierarchical fits
 (hBayesDM and the Stan variant) are cross-checks, and in the hierarchical cross-validation ORL did not fully converge in
-several folds (see Extension).
+several folds (see Extension). The eight-model cross-validation also used maximum likelihood, so its predictions
+ignore uncertainty in each person's parameters, which likely contributes to the VSE models' overconfident failures.
 3. I only refit perseveration parameters with wider limits; there were cases (e.g., VPP λ and A) that were not rechecked.
 4. The simulator function used draws outcomes at random from each deck rather than using the task's actual card sequence.
 5. AIC & BIC count parameters rather than assessing the model's actual flexibility; the cross-validation addresses this.
@@ -612,17 +764,24 @@ hold for clinical groups or other payoff schemes.
 8. βP_loss is estimated from fewer trials than βP_win (losses are less frequent than gains) and recovered less well
 (r = .83 vs. .90). Many βP estimates sit at the +/- 10 limit (48 βP_win, 31 βP_loss); at the limit, the sign recovers
 but not the size.
-9. Neither ORL nor the variant reproduces how quickly people return to deck B after its big loss (see the exploratory analysis).
+9. No model reproduces how quickly people return to deck B after its big loss: diminishing sensitivity didn't help,
+and VSE narrowed the gap without closing it.
+10. The model ranking comes from one sample (Horstmann, N = 162); Janbesaraei et al. (2025) found that ORL-vs-VSE
+results depend on the dataset.
+11. Individual α (r = .57) and ψ (r = .66) estimates recover poorly, so I interpret them only at the group level.
+12. The cross-validation sensitivity check's cutoff (any fold below −100) was chosen after seeing the results; the
+prespecified totals are reported first.
 
 
 ## Next steps
 
-- Find out why the hierarchical ORL mixes poorly in some cross-validation folds while the variant converges in all
-- Lapse-term check: add a random-choice term ε (Shteingart, Neiman & Loewenstein, 2013, Eq. 2) to ORL and the variant, and test whether the win/loss asymmetry survives
-- Repeated model and parameter recovery (10+ simulated datasets per participant), on Kodiak
-- A diminishing-sensitivity version of ORL for the deck-B misfit, with a dated prediction and a held-out test
-- A small recurrent neural network as a benchmark for how much predictable structure the models miss
-- Random-effects model selection (undecided)
+- A confirmatory test of ORL + α against VSE and the variant on the other many-labs studies (excluding Horstmann and
+the held-out 70), with dated predictions
+- Per-person model attribution: stacking the cross-validated predictions (Yao, Vehtari, Simpson & Gelman, 2018) and
+hierarchical model selection (Piray et al., 2019), since different participants are fit best by different models
+- A thorough literature check that utility curvature hasn't been added to ORL before
+- Small recurrent neural networks as a benchmark for how much predictable structure the models miss
+- An EEG study testing which model's prediction errors the reward positivity tracks
 
 ## How to run
 
@@ -663,6 +822,24 @@ results are saved to `output/` so later scripts don't refit.
 | `22_deckB_after_loss.R` | Exploratory: returning to deck B after its big loss, observed vs. simulated from ORL and the variant | minutes |
 | `23_cv_fold.R` | One cross-validation fit of the hierarchical ORL or variant (fold 0–10); run from Terminal, see below | ~4–6 hours per fit on Kodiak |
 | `23b_cv_summary.R` | Combines the 22 cross-validation fits: PSIS-LOO comparison, held-out elpd difference with SE, convergence | seconds |
+| `24_orl_mixing.R` | Refits the hierarchical ORL on one fold, saving diagnostics and draws for the worst-mixing participants | hours, on Kodiak |
+| `24b_orl_mixing_summary.R` | Which ORL parameters mix poorly; chain-by-chain K′ and βP | seconds |
+| `25_lapse.R` | Fits ORL or the variant with a lapse term | on Kodiak |
+| `25b_lapse_summary.R` | Summarizes the lapse-term check | seconds |
+| `26_recovery_reps.R` | One replicate of model and parameter recovery (10 replicates in all) | on Kodiak |
+| `26b_recovery_reps_summary.R` | Summarizes the 10 recovery replicates | seconds |
+| `27_alpha_model.R` | ORL + α and the variant + α: likelihood, simulator, fitting function, checks | seconds |
+| `28_fit_alpha.R` | Fits ORL + α or the variant + α to all participants | on Kodiak |
+| `29_alpha_recovery.R` | Parameter recovery for the variant + α | ~2 hours on Kodiak |
+| `29b_alpha_null.R` | Null check: simulates with α = 1, refits, counts estimates below 1 | ~2 hours on Kodiak |
+| `30_alpha_checks.R` | Scores the diminishing-sensitivity predictions | ~1 min |
+| `31_vse_models.R` | VSE, VSE-split, EEF and WSLS: likelihoods, simulators, fitting function, checks | seconds |
+| `32_fit_vse.R` | Fits VSE then VSE-split, EEF, or WSLS to all participants | ~30 min on Kodiak |
+| `32b_vse_limit_check.R` | Refits VSE-family participants at a parameter limit with wider limits | ~15 min |
+| `33_vse_recovery.R` | Recovery for VSE and VSE-split | ~20 min on Kodiak |
+| `34_vse_checks.R` | Scores the newer-model predictions; 10-model AIC/BIC table | ~1 min |
+| `35_cv_mle.R` | One maximum-likelihood cross-validation fit (one model, one fold) | up to ~1.5 hours per fit on Kodiak |
+| `35b_cv_mle_summary.R` | Combines the 70 fits, adds WSLS, scores the predictions, runs the sensitivity check | seconds |
 
 *On an Apple silicon MacBook Air.
 
@@ -671,6 +848,9 @@ Scripts 16, 20, 21 and 23 also need CmdStan, installed separately with `cmdstanr
 Script 23 takes arguments and runs from the Terminal: `Rscript scripts/23_cv_fold.R orl 3` fits ORL on fold 3
 (use `wl` for the variant; add `quick` for a 10-person test). On Baylor's Kodiak cluster (PBS), `qsub kodiak/cv_array.sh`
 from the project folder runs all 22 fits (2 models × folds 0–10) as a job array, with R 4.5.2.
+Scripts 24–26, 28–29b, 32–33 and 35 also take arguments and have PBS job files in `kodiak/`; for example,
+`qsub kodiak/cv_mle.sh` runs all 70 maximum-likelihood cross-validation fits (7 models × 10 folds). Add `quick`
+(or `-v QUICK=quick` with `qsub`) for a short test.
 
 ## How this project was built
 
@@ -695,6 +875,7 @@ its ORL code (Ahn, Haines & Zhang, 2017). I wrote and ran the code myself in RSt
 - Horstmann, A., Villringer, A., & Neumann, J. (2012). Iowa Gambling Task: There is more to consider than long-term outcome. Using a linear equation model to disentangle the impact of outcome and frequency of gains and losses. *Frontiers in Neuroscience, 6*, 61. https://doi.org/10.3389/fnins.2012.00061
 - Janbesaraei, S. N., Hadian Rasanan, A. H., Nejati, V., & Amani Rad, J. (2025). Do human reinforcement learning models account for key experimental choice patterns in the Iowa Gambling Task? *Computational Brain & Behavior, 8*, 286–320. https://doi.org/10.1007/s42113-024-00228-2
 - Ligneul, R. (2019). Sequential exploration in the Iowa gambling task: Validation of a new computational model in a large dataset of young and old healthy participants. *PLOS Computational Biology, 15*(6), e1006989. https://doi.org/10.1371/journal.pcbi.1006989
+- Piray, P., Dezfouli, A., Heskes, T., Frank, M. J., & Daw, N. D. (2019). Hierarchical Bayesian inference for concurrent model fitting and comparison for group studies. *PLOS Computational Biology, 15*(6), e1007043. https://doi.org/10.1371/journal.pcbi.1007043
 - Shteingart, H., Neiman, T., & Loewenstein, Y. (2013). The role of first impression in operant learning. *Journal of Experimental Psychology: General, 142*(2), 476–488. https://doi.org/10.1037/a0029550
 - Steingroever, H., Wetzels, R., Horstmann, A., Neumann, J., & Wagenmakers, E.-J. (2013). Performance of healthy participants on the Iowa Gambling Task. *Psychological Assessment, 25*(1), 180–193. https://doi.org/10.1037/a0029929
 - Steingroever, H., et al. (2015). Data from 617 healthy participants performing the Iowa Gambling Task: A "many labs" collaboration. *Journal of Open Psychology Data, 3*(1), e5. https://doi.org/10.5334/jopd.ak
@@ -702,6 +883,7 @@ its ORL code (Ahn, Haines & Zhang, 2017). I wrote and ran the code myself in RSt
 - Worthy, D. A., Hawthorne, M. J., & Otto, A. R. (2013). Heterogeneity of strategy use in the Iowa gambling task: A comparison of win-stay/lose-shift and reinforcement learning models. *Psychonomic Bulletin & Review, 20*(2), 364–371. https://doi.org/10.3758/s13423-012-0324-9
 - Worthy, D. A., Pang, B., & Byrne, K. A. (2013). Decomposing the roles of perseveration and expected value representation in models of the Iowa Gambling Task. *Frontiers in Psychology, 4*, 640. https://doi.org/10.3389/fpsyg.2013.00640
 - Yang, T., Xie, C., & Wang, X. (2025). Forgetting phenomena in the Iowa Gambling Task: A new computational model among diverse participants. *Frontiers in Psychology, 16*, 1510151. https://doi.org/10.3389/fpsyg.2025.1510151
+- Yao, Y., Vehtari, A., Simpson, D., & Gelman, A. (2018). Using stacking to average Bayesian predictive distributions (with discussion). *Bayesian Analysis, 13*(3), 917–1007. https://doi.org/10.1214/17-BA1091
 
 ## License
 
