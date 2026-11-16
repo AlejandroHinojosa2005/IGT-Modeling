@@ -715,6 +715,8 @@ training choices are almost perfectly predictable (participant 69: training nega
 choices), the model becomes nearly certain, and one unexpected held-out choice costs thousands. This happened within
 the original limits, so widening them did not cause it.
 
+**Correction** (November 16, 2026): the plan above says the limits were widened, but script 35 kept the limits of the main fits (the saved estimates never pass ±10, or ±5 for EEF's φ). The results above and below are as run.
+
 **Sensitivity** (added after scoring): the same comparison without the 5 participants who had any fold below −100 in
 any model (a cutoff chosen after seeing the results), applied to every model:
 
@@ -744,6 +746,70 @@ curvature has not been added to ORL before; VSE uses a similar exponent θ in a 
 competitive for most participants but can become overconfident for highly consistent ones. Gains are concentrated in
 subsets of participants (the variant beat ORL for only 74 of 157), which points to people using different strategies.
 All of this comes from one sample; other studies are needed before any claim about which model is best in general.
+
+## Held-out test of outcome curvature
+
+**Plan and predictions** (written November 16, 2026, before any α model or VSE was fit to the held-out sample):
+ORL + α predicted held-out choices best on the Horstmann sample, the sample that motivated it. This tests it on
+the held-out sample (SteingroverInPrep, N = 70, payoff scheme 2), which has so far been fit only with ORL and the
+variant. Procedure as on Horstmann: ORL + α and the variant + α start once from that participant's held-out ORL or
+variant fit with α = 1, plus 20 random starts; VSE uses 20 random starts; the ten-fold cross-validation follows
+script 35 (same folds, trial 1 never held out, 20 starts per fit) for ORL, the variant, ORL + α and the variant + α.
+All limits are those of the main fits. Scripts 41 and 41b; job file `kodiak/heldout_alpha.sh`.
+
+1. Summed AIC favors ORL + α over ORL.
+2. α < 1 for more than 55% of participants (one-sided binomial test against .55, the share of estimates below 1
+   when data were simulated with α = 1 in script 29b; p < .05), and median α < 1.
+3. In ten-fold cross-validation, ORL + α predicts held-out choices better than ORL (one-sided, z > 1.645).
+   (With 70 participants, an effect the size of Horstmann's would give z of about 1.7.)
+4. Once α is included, the split adds nothing: the variant + α and ORL + α differ by less than 2 SE in
+   cross-validation.
+5. Summed AIC favors ORL + α over VSE.
+
+BIC is reported for every AIC comparison.
+
+## Exploratory: combining the models (stacking)
+
+*Not predicted (script 36).* When looking at the fact that there would always be some quantum of people that would be predicted best
+with different models, I thought that perhaps this could be countered by adding multiple models together. (Yao, Vehtari, Simpson & Gelman, 2018)
+weighted the average of hte model's predictions and compared them to all of the models independently.
+
+**What was done:**
+- No refitting: scripts 36 reruns each saved-cross-validation fit (script 35) to get the probability every model gave 
+every model gave every held-out choice (162 participants x 99 choices x 8 models). These add up exactly to the totals
+in script 35b.
+- A mix gives each held-out choice the probability w1 x p(model 1) + w2 p(model 2) + ..., with weights that add to 1, 
+chosen (by the 'loo' package) to make people's actual choices as probable as possible. 
+- Weights were always chosen on 9 folds' held-out choices and sscored on the 10th, rotating through all 10, so a mix is
+never scored on choices that set its weights.
+- Two versions: one shared mix for everyone, and a personal mix for each participant from their own choices.
+
+| | Held-out log-likelihood | vs. ORL + α (SE) | z | Better than ORL + α for |
+|---|---|---|---|---|
+| ORL + α (best single model) | −16,455.5 | — | — | — |
+| Shared mix | −15,872.1 | +583.4 (80) | 7.3 | 124 of 162 |
+| Personal mixes | −15,820.8 | +634.7 (82) | 7.7 | 113 of 162 |
+
+- On averege, the shared mix gives the choice peopls actually made about 4% more probability than ORL + α. It still 
+wins without the 5 participants left out int the cross-validation sensitivity check (+547.6, SE 79.0, z = 6.9). 
+- Personal mixes added little beyond the shared mix (+[ ], SE [ ], z = [ ]; better for [ ] participants).
+- Shared-mix weights: VSE-split .22, ORL + α .21, variant + α .19, EEF .13, variant .12, VSE .05, WSLS .05, ORL .02.
+VSE-split gets the largest weight despite the worst total on its own: it predicts well on choces where the others don't.
+- In the personal mixes, every model was the largest weight for some participants (ORL + α 32, VSE 26, ORL 23,
+VSE-split 22, EEF 21, variant + α 16, variant 15, WSLS 7), and 119 participants had one model above half.
+
+**What it means:** the models make different mistakes, so averaging them predicts better than choosing one. That is
+more evidence that no single model captures how everyone plays the taksk. Part of the gain is hedging: each model's
+best-fitting paramters make somewhat overconfident predictions (the VSE failures are the extreme case), and averaging
+sofens that. Because personal mixes added little beyond a shared one, these data can't tell whether people combine several 
+strategies, or each usse one but with profiles too noisy to estimate from about 90 held-out choices.
+
+Exploratory, when I showed a friend the data he suggested I try to very the weights between personal and shared.
+Pulling each person’s weights toward the shared weights (70% own, 30% shared; chosen by cross-validation, 0.7
+in all ten folds) predicted better than either alone: −15,781.1, which is +90.9 over the shared mix (SE 21.3,
+z = 4.3; better for 97 participants) and +674.3 over ORL + α (SE 81.7, z = 8.3; better for 122). This suggests
+people differ in which models predict them, but 100 trials per person is too few to pin down each person’s mix.
+It does not show that people switch between strategies; that would need weights that change across trials.
 
 ## Limitations
 
@@ -775,13 +841,31 @@ prespecified totals are reported first.
 
 ## Next steps
 
-- A confirmatory test of ORL + α against VSE and the variant on the other many-labs studies (excluding Horstmann and
-the held-out 70), with dated predictions
-- Per-person model attribution: stacking the cross-validated predictions (Yao, Vehtari, Simpson & Gelman, 2018) and
-hierarchical model selection (Piray et al., 2019), since different participants are fit best by different models
-- A thorough literature check that utility curvature hasn't been added to ORL before
-- Small recurrent neural networks as a benchmark for how much predictable structure the models miss
-- An EEG study testing which model's prediction errors the reward positivity tracks
+These results leave me with a question: do people use different learning algorithms, or does everyone mix several?
+If people mix, two more questions follow. What prompts someone to switch from one strategy to another? And is the
+mixing real, or a sign that the models are incomplete, and a single better model could predict every learner well?
+I suspect the answer lies beyond these data, because a model is only as good as the data it is fit to. With about 100
+choices per person, behavior alone is a thin data stream: model recovery, the per-person model counts and stacking all
+show how noisy per-person attributions are.
+
+So the next step is to get closer to the decision-making organ itself. With fMRI, Cockburn et al. (2022) separated two
+exploration mechanisms that behavior could not tell apart, because each predicted different brain signals. I want to
+try the same with EEG.
+
+- **Preprint** of the results above.
+- **Confirmatory test on new data:** ORL + α against VSE, the variant and the stacked mix on the other studies in the
+many-labs pool (excluding Horstmann and the held-out 70), with dated predictions.
+- **Check that ORL + α is new:** a full search of the papers citing Haines et al. (2018) for utility curvature in ORL.
+- **Per-person attribution:** hierarchical model selection (Piray et al., 2019), which pools across participants,
+alongside stacking.
+- **Tiny recurrent neural networks:** a flexible benchmark for how much predictable structure all of these models
+miss (Ji-An, Benna & Mattar, 2025).
+- **An EEG study:** each model predicts a prediction error on every trial, and an EEG signal after feedback, the
+reward positivity, tracks prediction errors (Sambrook & Goslin, 2015). Testing whose prediction errors a person's
+reward positivity follows (one model's, or a blend) would give neural evidence on strategy. A longer task or two
+sessions would add choices per person.
+- **Clinical data:** the same models on IGT data from people with substance dependence (e.g., the public data from
+Ahn et al., 2014).
 
 ## How to run
 
