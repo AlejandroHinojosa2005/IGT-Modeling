@@ -768,6 +768,24 @@ All limits are those of the main fits. Scripts 41 and 41b; job file `kodiak/held
 
 BIC is reported for every AIC comparison.
 
+**Results** (scored November 16, 2026, script 41b): all five predictions were met.
+
+| | Prediction | Result | Met |
+|---|---|---|---|
+| 1 | Summed AIC favors ORL + α over ORL | 12,828.9 vs. 13,083.9 | Yes |
+| 2 | α < 1 for more than 55% (binomial test vs. .55), median α < 1 | 62 of 70 (88.6%), p = 1.5 × 10⁻⁹; median 0.32 | Yes |
+| 3 | CV: ORL + α predicts better than ORL (z > 1.645) | +139.3 (SE 60.7), z = 2.29; better for 48 of 70 | Yes |
+| 4 | CV: variant + α and ORL + α within 2 SE | −15.9 (SE 39.6), z = −0.40 | Yes |
+| 5 | Summed AIC favors ORL + α over VSE | 12,828.9 vs. 13,035.3 | Yes |
+
+- Summed AIC: variant + α 12,757.9, ORL + α 12,828.9, variant 12,907.5, VSE 13,035.3, ORL 13,083.9. Summed BIC:
+ORL + α 13,923.0, VSE 13,947.1, ORL 13,995.8, variant 14,001.6, variant + α 14,034.4. As on Horstmann, AIC favors
+the variant + α and BIC favors ORL + α.
+- Lowest AIC per participant: ORL 14, variant 13, ORL + α 18, variant + α 11, VSE 14. Lowest BIC: 21, 13, 12, 4, 20.
+- 23 of 70 α estimates (33%) sat at the lower limit (0.01).
+- Cross-validation totals: ORL −6,585.1, variant −6,521.7, ORL + α −6,445.8, variant + α −6,461.7. Without α, the
+variant beat ORL by 63.4 (SE 42.2, z = 1.50; better for 32 of 70); ORL + α vs. the variant: +75.9 (SE 68.4, z = 1.11).
+
 ## Exploratory: combining the models (stacking)
 
 *Not predicted (script 36).* When looking at the fact that there would always be some quantum of people that would be predicted best
