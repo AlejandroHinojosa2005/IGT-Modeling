@@ -6,6 +6,7 @@
 #                    only the first 100 trials (N = 440).
 #   "simulated":     the no-switching data made by script 44 (N = 324).
 #   "replication342": the replication sample without the two 150-trial studies (robustness check 5).
+#   "sim_switch", "sim_types": exploratory data WITH switching, made by script 44b (N = 162 each).
 # Payoff schemes as described in the data paper (Steingroever et al., 2015): 1 = the original IGT, 2 = the variant with
 # a constant loss on deck C and shuffled outcomes, 3 = the Bechara and Damasio scheme in which the decks change over blocks.
 scheme_of <- c(Horstmann = 2, Kjome = 3, Maia = 1, Premkumar = 3, SteingroverInPrep = 2,
@@ -13,6 +14,7 @@ scheme_of <- c(Horstmann = 2, Kjome = 3, Maia = 1, Premkumar = 3, SteingroverInP
 
 load_set <- function(name) {
   if (name == "simulated") return(readRDS("output/prereg/null_sim_data.rds"))
+  if (name %in% c("sim_switch", "sim_types")) return(readRDS(sprintf("output/prereg/%s_data.rds", name)))
   e <- new.env()
   load("data-raw/IGTdata.rdata", envir = e)
   s100 <- e$index_100[, "Study"]
