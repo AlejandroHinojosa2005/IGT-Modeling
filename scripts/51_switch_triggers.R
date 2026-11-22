@@ -88,9 +88,14 @@ fit_hmm <- function(L, delta = NA) {                     # script 47's fit, for 
   K <- dim(L)[3]; free <- is.na(delta)
   unpack <- function(par) list(w = softmax(par[1:(K - 1)]), delta = if (free) plogis(par[K]) else delta)
   nll <- function(par) { u <- unpack(par); -sum(hmm_ll(L, u$w, u$delta)) }
+  # Weights start equal; with the random state (last model), also from equal weights with the random state near 0
+  # (weight about 0.0003), because when the random state is not needed BFGS can stop while still pushing its weight
+  # toward 0 before the other weights are fit
+  w_starts <- list(rep(0, K - 1))
+  if (dimnames(L)[[3]][K] == "random") w_starts[[2]] <- c(rep(0, K - 2), -8)
   best <- NULL
-  for (d0 in if (free) c(-3, 0, 3) else NA) {
-    opt <- optim2(c(rep(0, K - 1), if (free) d0), nll)
+  for (w0 in w_starts) for (d0 in if (free) c(-3, 0, 3) else NA) {
+    opt <- optim2(c(w0, if (free) d0), nll)
     if (is.null(best) || opt$value < best$value) best <- opt
   }
   c(unpack(best$par), conv = best$convergence)
