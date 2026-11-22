@@ -1,0 +1,30 @@
+switches_per_person               delta 
+         5.13646559          0.06134828 
+         after_gain after_loss after_big_loss loss_minus_gain   se1
+inferred     0.0523     0.0533         0.0537           0.001 3e-04
+         big_minus_gain   se2 people_with_big_loss
+inferred         0.0014 5e-04                  435
+      w_random_blend w_random_switching delta conv
+ [1,]              0              0.078 0.093    0
+ [2,]              0              0.080 0.089    0
+ [3,]              0              0.078 0.090    0
+ [4,]              0              0.081 0.094    0
+ [5,]              0              0.076 0.092    0
+ [6,]              0              0.076 0.097    0
+ [7,]              0              0.077 0.088    0
+ [8,]              0              0.079 0.095    0
+ [9,]              0              0.077 0.091    0
+[10,]              0              0.077 0.096    0
+                     diff   se    z
+switching_gain_8    172.8 26.1  6.6
+switching_gain_9    310.3 31.3  9.9
+random_in_blend       0.0  0.0 -0.5
+random_in_switching 137.5 20.1  6.8
+                                 w_random 
+                                    0.078 
+                                    delta 
+                                    0.093 
+                       mean_belief_random 
+                                    0.072 
+people_with_random_over_half_on_10_trials 
+                                   29.000 
