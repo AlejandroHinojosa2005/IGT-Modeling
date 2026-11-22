@@ -1,0 +1,5 @@
+[1] 0.0531574
+changes_per_player      types_changes 
+          3.845679           0.000000 
+sim_switch  sim_types  horstmann 
+     0.509      0.513      0.506 
