@@ -79,6 +79,9 @@ Horstmann results of scripts 36–38, 42 and 42b.
 | `50_hybrid_model.R` | The hybrid model: ORL + α with a starting value, decay and (in one version) separate bending | — |
 | `50b_hybrid_cv.R` | Ten-fold cross-validation of the four hybrid versions, as script 45 (plus ORL + α's fit as one more start) | about 3–5 h (Horstmann), 6 runs at a time |
 | `50c_hybrid_score.R` | The hybrid against ORL + α, the other models and the mixes | minutes |
+| `50d_nova_replication.R` | NOVA (the hybrid) on the replication sample: four tests written down first (`predictions/nova_replication.md`) | minutes, after script 50b on `replication` (about 3 h) |
+| `54_pooled_cv.R` | Every model refit with a group prior (empirical Bayes, expectation-maximization with a Laplace approximation), same folds | about 2 h (Horstmann), 6 runs at a time |
+| `54b_pooled_score.R` | Pooled against unpooled fits, NOVA against ORL + α both pooled, and the mixes | minutes |
 | `52_model_subsets.R` | The shared mix with fewer models: without one model at a time, and two sets of five | minutes |
 
 ```
@@ -98,4 +101,22 @@ for v in orl_alpha_start orl_alpha_decay hybrid hybrid_sep; do for f in 01 02 03
 done; done | xargs -P 6 -n 3 sh -c 'Rscript scripts/50b_hybrid_cv.R horstmann $0 $1 $2 2 > /dev/null'
 Rscript scripts/50c_hybrid_score.R horstmann
 for d in horstmann replication; do Rscript scripts/52_model_subsets.R $d; done
+```
+
+NOVA on the replication sample (predictions in `predictions/nova_replication.md`, committed before running):
+
+```
+for f in 01 02 03 04 05 06 07 08 09 10; do for p in 1 2 3 4; do
+  [ -f output/hybrid/cv/replication/hybrid_fold${f}_part$p.rds ] || echo "hybrid $f $p"
+done; done | xargs -P 6 -n 3 sh -c 'Rscript scripts/50b_hybrid_cv.R replication $0 $1 $2 4 > /dev/null'
+Rscript scripts/50d_nova_replication.R
+```
+
+Pooled fits (script 54), after NOVA's held-out predictions exist for that sample (script 50c or 50d):
+
+```
+for m in orl variant orl_alpha variant_alpha vse vse_split eef nova; do for f in 01 02 03 04 05 06 07 08 09 10; do
+  [ -f output/pooled/cv/horstmann/${m}_fold$f.rds ] || echo "$m $f"
+done; done | xargs -P 6 -n 2 sh -c 'Rscript scripts/54_pooled_cv.R horstmann $0 $1 > /dev/null'
+Rscript scripts/54b_pooled_score.R horstmann
 ```
