@@ -82,6 +82,10 @@ Horstmann results of scripts 36–38, 42 and 42b.
 | `50d_nova_replication.R` | NOVA (the hybrid) on the replication sample: four tests written down first (`predictions/nova_replication.md`) | minutes, after script 50b on `replication` (about 3 h) |
 | `54_pooled_cv.R` | Every model refit with a group prior (empirical Bayes, expectation-maximization with a Laplace approximation), same folds | about 2 h (Horstmann), 6 runs at a time |
 | `54b_pooled_score.R` | Pooled against unpooled fits, NOVA against ORL + α both pooled, and the mixes | minutes |
+| `55_make_stan.py` | Writes the hierarchical Stan models (`stan/hier/`) from one copy of the likelihood functions | seconds |
+| `55a_stan_check.R` | Every Stan model compiles, and its likelihood equals the R functions' on every trial | minutes |
+| `55b_stan_recovery.R` | Parameter recovery for one Stan model (60 simulated players) | about 1 h per model |
+| `55_stan_fit.R` | Hierarchical Bayesian fit of one model: all trials (`full`) or one cross-validation fold | about 1 h per fit (Horstmann) |
 | `52_model_subsets.R` | The shared mix with fewer models: without one model at a time, and two sets of five | minutes |
 
 ```
@@ -119,4 +123,13 @@ for m in orl variant orl_alpha variant_alpha vse vse_split eef nova; do for f in
   [ -f output/pooled/cv/horstmann/${m}_fold$f.rds ] || echo "$m $f"
 done; done | xargs -P 6 -n 2 sh -c 'Rscript scripts/54_pooled_cv.R horstmann $0 $1 > /dev/null'
 Rscript scripts/54b_pooled_score.R horstmann
+```
+
+Hierarchical Bayesian versions (cmdstanr; the Stan files are written by script 55_make_stan.py):
+
+```
+python3 scripts/55_make_stan.py .
+Rscript scripts/55a_stan_check.R
+for m in orl orl_split orl_alpha orl_split_alpha nova vse vse_split eef; do Rscript scripts/55b_stan_recovery.R $m; done
+Rscript scripts/55_stan_fit.R horstmann nova full
 ```
