@@ -76,7 +76,10 @@ Horstmann results of scripts 36–38, 42 and 42b.
 | `45`–`47` with `sim_switch` and `sim_types` | The same pipeline on those players | about 6 h, then minutes |
 | `49_weight_recovery.R` | Compares the personal weights estimated for the no-switching players with the true weights | seconds |
 | `51_switch_triggers.R` | When the switching model infers a switch (after gains vs. losses), and whether a random-choice state explains part of the switching gain | minutes |
-| `50_hybrid_model.R` | The hybrid model (ORL + α with a starting value, decay and separate bending); not yet fit | — |
+| `50_hybrid_model.R` | The hybrid model: ORL + α with a starting value, decay and (in one version) separate bending | — |
+| `50b_hybrid_cv.R` | Ten-fold cross-validation of the four hybrid versions, as script 45 (plus ORL + α's fit as one more start) | about 3–5 h (Horstmann), 6 runs at a time |
+| `50c_hybrid_score.R` | The hybrid against ORL + α, the other models and the mixes | minutes |
+| `52_model_subsets.R` | The shared mix with fewer models: without one model at a time, and two sets of five | minutes |
 
 ```
 Rscript scripts/44b_switch_simulation.R
@@ -84,4 +87,15 @@ Rscript scripts/44b_switch_simulation.R
 for d in sim_switch sim_types; do Rscript scripts/46_prereg_stacking.R $d; Rscript scripts/47_prereg_switching.R $d; done
 Rscript scripts/49_weight_recovery.R
 for d in replication sim_switch; do Rscript scripts/51_switch_triggers.R $d; done
+```
+
+The hybrid model, on the discovery sample (script 46 with `horstmann` first, for the eight models' held-out predictions):
+
+```
+Rscript scripts/46_prereg_stacking.R horstmann
+for v in orl_alpha_start orl_alpha_decay hybrid hybrid_sep; do for f in 01 02 03 04 05 06 07 08 09 10; do
+  for p in 1 2; do [ -f output/hybrid/cv/horstmann/${v}_fold${f}_part$p.rds ] || echo "$v $f $p"; done
+done; done | xargs -P 6 -n 3 sh -c 'Rscript scripts/50b_hybrid_cv.R horstmann $0 $1 $2 2 > /dev/null'
+Rscript scripts/50c_hybrid_score.R horstmann
+for d in horstmann replication; do Rscript scripts/52_model_subsets.R $d; done
 ```
