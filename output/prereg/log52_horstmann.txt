@@ -1,0 +1,26 @@
+This is loo version 2.10.1
+- Online documentation and vignettes at mc-stan.org/loo
+- As of v2.0.0 loo defaults to 1 core but we recommend using as many as possible. Use the 'cores' argument or set options(mc.cores = NUM_CORES) for an entire session. 
+[1] 0
+                    diff   se    z
+drop_orl             0.9  1.0  0.9
+drop_variant        -5.3  4.8 -1.1
+drop_orl_alpha     -17.2  9.0 -1.9
+drop_variant_alpha -14.7  8.5 -1.7
+drop_vse             0.0  2.2  0.0
+drop_vse_split     -22.0 12.3 -1.8
+drop_eef           -12.3  7.1 -1.7
+drop_wsls          -20.6 12.1 -1.7
+five_nested_out    -32.5 12.1 -2.7
+five_cheapest       -8.9  7.0 -1.3
+$five_nested_out
+      variant variant_alpha     vse_split           eef          wsls 
+        0.172         0.324         0.262         0.189         0.053 
+
+$five_cheapest
+    orl_alpha variant_alpha     vse_split           eef          wsls 
+        0.257         0.256         0.266         0.161         0.060 
+
+                 diff   se   z better_for
+five_nested_out 550.9 86.7 6.4        112
+five_cheapest   574.4 80.5 7.1        123

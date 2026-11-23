@@ -1,0 +1,39 @@
+This is loo version 2.10.1
+- Online documentation and vignettes at mc-stan.org/loo
+- As of v2.0.0 loo defaults to 1 core but we recommend using as many as possible. Use the 'cores' argument or set options(mc.cores = NUM_CORES) for an entire session. 
+[1] 0
+orl_alpha_start orl_alpha_decay          hybrid 
+   3.552714e-15    5.684342e-14    1.421085e-14 
+orl_alpha_start orl_alpha_decay          hybrid      hybrid_sep 
+      0.1382716       0.3919753       0.1858025       0.2117284 
+                  diff    se    z better_for
+orl_alpha_start   67.3  70.3  1.0         80
+orl_alpha_decay -206.0 140.1 -1.5         71
+hybrid           -55.8 128.7 -0.4         88
+hybrid_sep      -106.9 182.4 -0.6         93
+                diff     se    z better_for
+orl            172.8  154.1  1.1         93
+variant        -22.6  159.3 -0.1         89
+orl_alpha      -55.8  128.7 -0.4         88
+variant_alpha  -55.5  135.9 -0.4         89
+vse           7104.3 6033.7  1.2         93
+vse_split     3509.7 2461.3  1.4         92
+eef           3770.8 3562.5  1.1         95
+wsls          1255.3  204.0  6.2        124
+shared_mix    -639.2  146.3 -4.4         48
+                    diff   se    z better_for
+eight_plus_hybrid   82.1 20.6  4.0         96
+five                -8.9  7.0 -1.3         71
+five_hybrid         75.7 22.7  3.3         90
+five_hybrid_vs_five 84.6 22.7  3.7         97
+          orl       variant     orl_alpha variant_alpha           vse 
+        0.014         0.098         0.044         0.148         0.000 
+    vse_split           eef          wsls        hybrid 
+        0.178         0.114         0.049         0.355 
+       hybrid variant_alpha     vse_split           eef          wsls 
+        0.388         0.239         0.189         0.125         0.059 
+          Min. 1st Qu. Median  Mean 3rd Qu. Max.
+Q0_start    -5  -1.272  1.085 0.969   3.439    5
+D_decay      0   0.498  0.823 0.697   0.978    1
+Q0_hybrid   -5  -2.060  1.458 0.861   3.820    5
+D_hybrid     0   0.606  0.911 0.773   0.990    1
