@@ -26,6 +26,7 @@ source("scripts/50_hybrid_model.R")
 other <- if (!is.na(prior)) prior else if (data_name == "horstmann") "replication" else "horstmann"
 fw_dir <- if (!is.na(prior)) paste0(data_name, "_prior-", prior) else cv_source(data_name)
 tag <- if (!is.na(prior)) paste0(data_name, "_prior-", prior) else data_name
+if (length(centaur_file)) tag <- paste0(tag, "_centaur")       # keep the comparison without Centaur (all participants) as it is
 
 # Our models' forward predictions (all parts), on the participants every model has been scored on
 fw_names <- c(names(models), "nova", "wsls")

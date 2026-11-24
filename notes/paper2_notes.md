@@ -42,3 +42,27 @@ each), the registered results as registered, and the N = 438 results as a robust
 - Psych-101 has 577 IGT records: the whole pool (617) except Maia's study (40), which is not in Psych-101 at all.
 - Of our 602: 498 in Centaur's training set, 64 in its held-out set (17 Horstmann, 47 replication), and Maia's 40 absent.
   Centaur is scored on the 104 it never saw (`centaur/score_centaur.py` scores the held-out and the absent).
+
+## Centaur against the models (November 24, 2026)
+
+Centaur 70B (Binz et al., 2025) run on a rented RunPod pod (2 × A100 80GB, about 30 minutes, under $5), scoring every
+choice of the 104 participants it never trained on (`centaur/run_centaur.sh`; scores in `centaur/centaur70b_scores.csv`,
+never committed). Compared with our models' forward predictions on the same people and choices (`scripts/57b`, with
+the scores file). Exploratory: no prediction was written for this comparison. Probability given to the choice actually
+made, trials 2-100:
+
+| Participants | Centaur | Mix of eight | NOVA | ORL + α | Mix vs. Centaur |
+|---|---|---|---|---|---|
+| Horstmann, held out of Psych-101 (17) | .439 | .384 | .380 | .368 | z = −5.8; mix better for 0 of 17 |
+| Replication, held out (47) | .400 | .359 | .356 | .350 | z = −6.7; 7 of 47 |
+| Maia, a study not in Psych-101 at all (40) | .415 | .377 | .374 | .363 | z = −8.7; 1 of 40 |
+
+Centaur predicts the next choice better than every model and both mixes, for nearly everyone, including a whole study
+it never saw. Points for the paper: Centaur learned from about 500 other people doing this exact task (same decks and
+payoff schedules), while our models know the task only through their equations and a group prior from the other sample.
+So the gap measures how much predictable structure the models miss, not which explanation is right. NOVA and the mixes
+come closest. This is the case for the small-RNN benchmark (Ji-An, Benna & Mattar, 2025): find out what Centaur captures
+that the models do not.
+
+(Numbers computed in Claude's workspace with the repository's scripts; rerun on the Mac for the record:
+`Rscript scripts/57b_forward_compare.R horstmann centaur/centaur70b_scores.csv` and the same with `replication`.)
