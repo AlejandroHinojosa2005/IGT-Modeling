@@ -1,0 +1,58 @@
+N = 440 
+                                        diff    se    z better_for  met
+Q1_pooling_improves_nova              1180.3 277.0  4.3        260 TRUE
+Q2_pooled_nova_vs_pooled_orl_alpha     462.2  71.9  6.4        249 TRUE
+Q3_eight_pooled_vs_eight_unpooled     -343.5  35.5 -9.7        145 TRUE
+Q4_five_nova_pooled_vs_eight_unpooled -172.8  41.8 -4.1        176 TRUE
+Q5_pooled_nova_vs_eight_unpooled      -641.9  77.7 -8.3        143 TRUE
+                                  diff   se    z better_for
+pooled_nova_vs_five_nova_pooled -469.1 51.2 -9.2        147
+                 diff     se   z better_for
+orl             344.6   68.6 5.0        257
+variant         390.6   86.9 4.5        253
+orl_alpha       434.0  110.2 3.9        240
+variant_alpha   535.2  125.1 4.3        249
+vse            1107.7  426.8 2.6        231
+vse_split     11497.5 6204.3 1.9        240
+eef            6664.6 6431.9 1.0        237
+nova           1180.3  277.0 4.3        260
+$orl
+            Arew  Apun Kprime betaF  betaP
+group_mean 0.283 0.094  0.259 1.939 -0.373
+sd_logit   1.495 0.675  1.587 0.315  0.841
+
+$variant
+            Arew  Apun Kprime betaF betaPw betaPl
+group_mean 0.156 0.059  0.405 1.390  0.748 -0.930
+sd_logit   1.018 0.789  0.652 0.304  0.648  0.597
+
+$orl_alpha
+            Arew  Apun Kprime betaF  betaP alpha
+group_mean 0.323 0.196  0.216 1.749 -0.610 0.535
+sd_logit   1.821 0.899  1.751 0.348  0.854 0.668
+
+$variant_alpha
+            Arew  Apun Kprime betaF betaPw betaPl alpha
+group_mean 0.249 0.155  0.376 1.431  0.062 -0.630 0.587
+sd_logit   1.591 1.182  0.759 0.410  0.756  0.599 0.664
+
+$vse
+           theta Delta alpha   phi  beta
+group_mean 0.225 0.589 0.278 0.579 0.805
+sd_logit   1.492 1.324 2.233 0.330 0.782
+
+$vse_split
+           theta Delta alpha   phi  beta    psi
+group_mean 0.167 0.547 0.298 0.694 0.906 -0.071
+sd_logit   1.907 1.594 2.470 0.296 0.996  0.157
+
+$eef
+           theta lambda   phi  beta
+group_mean 0.221  0.488 0.306 0.827
+sd_logit   1.269  1.187 0.496 0.423
+
+$nova
+            Arew  Apun Kprime betaF  betaP alpha    Q0     D
+group_mean 0.410 0.242  0.397 1.579 -0.341 0.489 2.094 0.964
+sd_logit   1.818 1.094  0.889 0.358  0.785 0.840 1.517 2.368
+

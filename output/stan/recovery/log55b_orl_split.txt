@@ -1,0 +1,25 @@
+This is cmdstanr version 0.9.0
+- CmdStanR documentation and vignettes: mc-stan.org/cmdstanr
+- CmdStan path: /Users/alejandrocomputer1/.cmdstan/cmdstan-2.40.0
+- CmdStan version: 2.40.0
+This is posterior version 1.7.0
+
+Attaching package: ‘posterior’
+
+The following objects are masked from ‘package:stats’:
+
+    mad, sd, var
+
+The following objects are masked from ‘package:base’:
+
+    %in%, match
+
+       spearman covered
+Arew       0.82    0.70
+Apun       0.78    0.98
+Kp         0.58    0.72
+betaF      0.92    0.87
+betaPw     0.87    0.65
+betaPl     0.75    0.80
+divergent  max_rhat 
+    0.000     1.004 

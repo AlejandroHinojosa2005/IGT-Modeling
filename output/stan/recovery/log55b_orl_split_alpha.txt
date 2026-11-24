@@ -1,0 +1,31 @@
+This is cmdstanr version 0.9.0
+- CmdStanR documentation and vignettes: mc-stan.org/cmdstanr
+- CmdStan path: /Users/alejandrocomputer1/.cmdstan/cmdstan-2.40.0
+- CmdStan version: 2.40.0
+This is posterior version 1.7.0
+
+Attaching package: ‘posterior’
+
+The following objects are masked from ‘package:stats’:
+
+    mad, sd, var
+
+The following objects are masked from ‘package:base’:
+
+    %in%, match
+
+Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Chain 4 Exception: Exception: categorical_logit_lpmf: log odds parameter[1] is nan, but must be finite! (in '/var/folders/c6/qsqwtpl138l60lk2yr43dlm80000gn/T/RtmpCDJd4b/model-37c567bc62.stan', line 28, column 6 to column 88) (in '/var/folders/c6/qsqwtpl138l60lk2yr43dlm80000gn/T/RtmpCDJd4b/model-37c567bc62.stan', line 145, column 4 to column 193)
+Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+Chain 4 
+       spearman covered
+Arew       0.76    0.72
+Apun       0.80    0.85
+Kp         0.34    0.70
+betaF      0.87    0.77
+betaPw     0.82    0.77
+betaPl     0.68    0.85
+alpha      0.58    0.65
+divergent  max_rhat 
+    0.000     1.007 
