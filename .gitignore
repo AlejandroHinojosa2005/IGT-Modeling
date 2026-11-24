@@ -14,3 +14,4 @@ stan/hier/*
 !stan/hier/*.stan
 centaur/*.csv
 Claude outputs/
+logs/
