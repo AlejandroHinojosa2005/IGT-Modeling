@@ -82,6 +82,10 @@ Horstmann results of scripts 36–38, 42 and 42b.
 | `50d_nova_replication.R` | NOVA (the hybrid) on the replication sample: four tests written down first (`predictions/nova_replication.md`) | minutes, after script 50b on `replication` (about 3 h) |
 | `54_pooled_cv.R` | Every model refit with a group prior (empirical Bayes, expectation-maximization with a Laplace approximation), same folds | about 2 h (Horstmann), 6 runs at a time |
 | `54b_pooled_score.R` | Pooled against unpooled fits, NOVA against ORL + α both pooled, and the mixes | minutes |
+| `54c_pooled_predictions.R` | The pooled fits on the replication sample: five tests written down first (`predictions/pooled_replication.md`) | seconds, after script 54b |
+| `56_identity_check.R` | VSE's exploration term equals ORL's perseverance with a negative weight, on every trial of both samples | seconds |
+| `57_forward_scores.R` | Forward predictions for the Centaur comparison: each choice from a fit to the earlier trials only, under the other sample's group prior | about a minute per person and model |
+| `57b_forward_compare.R` | Our models, their shared mixes and Centaur, forward, on the same people and choices | seconds |
 | `55_make_stan.py` | Writes the hierarchical Stan models (`stan/hier/`) from one copy of the likelihood functions | seconds |
 | `55a_stan_check.R` | Every Stan model compiles, and its likelihood equals the R functions' on every trial | minutes |
 | `55b_stan_recovery.R` | Parameter recovery for one Stan model (60 simulated players) | about 1 h per model |
@@ -123,6 +127,32 @@ for m in orl variant orl_alpha variant_alpha vse vse_split eef nova; do for f in
   [ -f output/pooled/cv/horstmann/${m}_fold$f.rds ] || echo "$m $f"
 done; done | xargs -P 6 -n 2 sh -c 'Rscript scripts/54_pooled_cv.R horstmann $0 $1 > /dev/null'
 Rscript scripts/54b_pooled_score.R horstmann
+```
+
+Pooled fits on the replication sample (predictions in `predictions/pooled_replication.md`, committed before running):
+
+```
+for m in orl variant orl_alpha variant_alpha vse vse_split eef nova; do for f in 01 02 03 04 05 06 07 08 09 10; do
+  [ -f output/pooled/cv/replication/${m}_fold$f.rds ] || echo "$m $f"
+done; done | xargs -P 6 -n 2 sh -c 'Rscript scripts/54_pooled_cv.R replication $0 $1 > /dev/null'
+Rscript scripts/54b_pooled_score.R replication
+Rscript scripts/54c_pooled_predictions.R replication
+```
+
+The correspondence between VSE's exploration and ORL's perseverance:
+
+```
+Rscript scripts/56_identity_check.R
+```
+
+Forward predictions and the Centaur comparison (after script 54 on both samples, and centaur/score_centaur.py):
+
+```
+for d in horstmann replication; do for m in orl variant orl_alpha variant_alpha vse vse_split eef nova wsls; do
+  echo "$d $m"
+done; done | xargs -P 6 -n 2 sh -c 'Rscript scripts/57_forward_scores.R $0 $1 who=centaur/psych101_igt_match.csv > /dev/null'
+Rscript scripts/57b_forward_compare.R horstmann centaur/centaur70b_scores.csv
+Rscript scripts/57b_forward_compare.R replication centaur/centaur70b_scores.csv
 ```
 
 Hierarchical Bayesian versions (cmdstanr; the Stan files are written by script 55_make_stan.py):
