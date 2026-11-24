@@ -13,7 +13,7 @@ Participants scored (from centaur/psych101_igt_match.csv, made by match_psych101
 Participants Centaur trained on are skipped. Only the first 100 choices are scored.
 
 Run from the project folder, after match_psych101.py:
-  python centaur/score_centaur.py --model marcelbinz/Llama-3.1-Centaur-8B --out centaur/centaur8b_scores.csv
+  python centaur/score_centaur.py --model marcelbinz/Llama-3.1-Minitaur-8B --out centaur/minitaur8b_scores.csv
   add --limit 3 for a quick test on three participants
 Memory: the 8B model needs about 16 GB in 16-bit (a GPU, or a Mac with more memory than that); the 70B needs about
 140 GB (two 80 GB GPUs).
@@ -86,8 +86,8 @@ def score(model, tok, text, letters, device):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default="marcelbinz/Llama-3.1-Centaur-8B")
-    ap.add_argument("--out", default="centaur/centaur8b_scores.csv")
+    ap.add_argument("--model", default="marcelbinz/Llama-3.1-Minitaur-8B")
+    ap.add_argument("--out", default="centaur/minitaur8b_scores.csv")
     ap.add_argument("--limit", type=int, default=0)
     a = ap.parse_args()
 

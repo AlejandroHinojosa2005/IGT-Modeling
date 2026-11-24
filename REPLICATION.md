@@ -90,6 +90,10 @@ Horstmann results of scripts 36–38, 42 and 42b.
 | `55a_stan_check.R` | Every Stan model compiles, and its likelihood equals the R functions' on every trial | minutes |
 | `55b_stan_recovery.R` | Parameter recovery for one Stan model (60 simulated players) | about 1 h per model |
 | `55_stan_fit.R` | Hierarchical Bayesian fit of one model: all trials (`full`) or one cross-validation fold | about 1 h per fit (Horstmann) |
+| `55_run_all.sh` | All 88 hierarchical fits of one data set on one machine (Mac or a rented computer), several at once | about 2 days (Horstmann, 8 cores) |
+| `55c_stan_cv_score.R` | The hierarchical cross-validation against the unpooled and pooled fits, NOVA against ORL + α, the mixes, and each fit's diagnostics | about 10 min |
+| `kodiak/stan_setup.sh`, `kodiak/stan_cv.sh` | The hierarchical fits on Kodiak: one-time setup, then 88 jobs per data set | about a day |
+| `centaur/run_centaur.sh`, `kodiak/centaur.sh` | The Centaur benchmark from start to finish on Kodiak's GPUs or a rented GPU (`centaur/RENTING.md`) | about 1 h |
 | `52_model_subsets.R` | The shared mix with fewer models: without one model at a time, and two sets of five | minutes |
 
 ```
@@ -162,4 +166,20 @@ python3 scripts/55_make_stan.py .
 Rscript scripts/55a_stan_check.R
 for m in orl orl_split orl_alpha orl_split_alpha nova vse vse_split eef; do Rscript scripts/55b_stan_recovery.R $m; done
 Rscript scripts/55_stan_fit.R horstmann nova full
+```
+
+All hierarchical fits and their cross-validation, on Kodiak (or on one machine with `bash scripts/55_run_all.sh <data> <jobs>`):
+
+```
+bash kodiak/stan_setup.sh                  # once, on the login node
+qsub -v DATA=horstmann kodiak/stan_cv.sh
+qsub -v DATA=replication kodiak/stan_cv.sh
+Rscript scripts/55c_stan_cv_score.R horstmann
+Rscript scripts/55c_stan_cv_score.R replication
+```
+
+The Centaur scores (on Kodiak: `qsub kodiak/centaur.sh`; on a rented GPU: `centaur/RENTING.md`):
+
+```
+bash centaur/run_centaur.sh marcelbinz/Llama-3.1-Centaur-70B centaur/centaur70b_scores.csv
 ```

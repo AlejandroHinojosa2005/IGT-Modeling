@@ -12,3 +12,4 @@ paper/
 !stan/hier/
 stan/hier/*
 !stan/hier/*.stan
+centaur/*.csv
