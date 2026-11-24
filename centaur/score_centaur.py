@@ -94,7 +94,7 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     dtype = torch.bfloat16 if device == "cuda" else torch.float16 if device == "mps" else torch.float32
     tok = AutoTokenizer.from_pretrained(a.model)
-    model = AutoModelForCausalLM.from_pretrained(a.model, torch_dtype=dtype,
+    model = AutoModelForCausalLM.from_pretrained(a.model, dtype=dtype,
                                                  device_map="auto" if device == "cuda" else None)
     if device != "cuda":
         model.to(device)

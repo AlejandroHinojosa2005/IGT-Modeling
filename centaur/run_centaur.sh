@@ -17,6 +17,10 @@ MODEL=${1:-marcelbinz/Llama-3.1-Centaur-70B}
 OUT=${2:-centaur/centaur70b_scores.csv}
 LIMIT=${3:-0}
 export HF_HOME=${HF_HOME:-$PWD/hf_cache}
+# A login made before HF_HOME was set is saved in the default place; use it if there is none in HF_HOME
+if [ -z "${HF_TOKEN_PATH:-}" ] && [ ! -f "$HF_HOME/token" ] && [ -f "$HOME/.cache/huggingface/token" ]; then
+  export HF_TOKEN_PATH=$HOME/.cache/huggingface/token
+fi
 [ -f data-raw/igt_trials.csv ] || { echo "data-raw/igt_trials.csv is missing: copy it from the Mac"; exit 1; }
 if [ ! -f data-raw/psych101/train.jsonl ] || [ ! -f data-raw/psych101/test.jsonl ]; then
   python centaur/download_psych101.py

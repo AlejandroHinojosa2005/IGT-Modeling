@@ -20,7 +20,8 @@ $2.20 per GPU per hour, the whole run should cost well under $20. Billing runs u
    git clone https://github.com/AlejandroHinojosa2005/IGT-Modeling.git
    cd IGT-Modeling
    pip install -r centaur/requirements.txt
-   huggingface-cli login            # paste your token here, in the pod's terminal only
+   export HF_HOME=/workspace/hf_cache   # before logging in, so the login is saved where the run looks
+   hf auth login                        # browser login, or paste your token here, in the pod's terminal only
    mkdir -p data-raw
    ```
 3. Upload `data-raw/igt_trials.csv` from the Mac into the pod's `IGT-Modeling/data-raw/` (the pod's file upload,
