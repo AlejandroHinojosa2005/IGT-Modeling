@@ -15,7 +15,7 @@
 #   script 42), and the fits on everyone (w, delta; early and late weights and k).
 # If a fit does not converge in a group (optimizer code not 0), that group is refit with up to 2,000 iterations.
 # Usage (from the project folder): Rscript scripts/47_prereg_switching.R <data>
-#   data: replication, simulated, replication342, or horstmann (reproduces scripts 37, 38, 42 and 42b, as a check)
+#   data: replication, simulated, replication342, replication438, or horstmann (reproduces scripts 37, 38, 42 and 42b, as a check)
 library(parallel)
 data_name <- commandArgs(trailingOnly = TRUE)[1]
 s <- readRDS(sprintf("output/prereg/stacking_%s.rds", data_name))

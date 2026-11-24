@@ -6,19 +6,19 @@
 #      NOVA (NOVA, ORL + split + alpha, VSE-split, EEF, WSLS), pooled, against the eight unpooled.
 #   4. The group means and spreads of each model's parameters (fold 1).
 # Needs script 46's stacking_<data>.rds and NOVA's unpooled predictions (script 50c for Horstmann, 50d for replication).
-# Usage (from the project folder): Rscript scripts/54b_pooled_score.R <data>   (horstmann or replication)
+# Usage (from the project folder): Rscript scripts/54b_pooled_score.R <data>   (horstmann, replication or replication438)
 library(loo)
 data_name <- commandArgs(trailingOnly = TRUE)[1]
 source("scripts/43_prereg_data.R")
 source("scripts/50_hybrid_model.R")
-d <- load_set(data_name)
+d <- load_kept(data_name)
 s <- readRDS(sprintf("output/prereg/stacking_%s.rds", data_name))
 rows <- s$rows
 n <- max(rows$subj)
 stopifnot(n == nrow(d$choice), nrow(rows) == n * 99)
 row_of <- function(i, trials) (i - 1) * 99 + trials - 1
 nova_unpooled <- if (data_name == "horstmann") readRDS("output/hybrid/score_horstmann.rds")$lpd_h[, "hybrid"] else
-  readRDS("output/hybrid/nova_replication.rds")$nova
+  readRDS(sprintf("output/hybrid/nova_%s.rds", data_name))$nova
 
 # Pooled held-out predictions, in the rows of script 46
 fitted <- c(names(models), "nova")
@@ -30,7 +30,7 @@ for (mn in fitted) {
   for (f in 1:10) {
     r <- readRDS(sprintf("output/pooled/cv/%s/%s_fold%02d.rds", data_name, mn, f))
     fit <- r$fit[order(r$fit$subj), ]
-    stopifnot(identical(as.integer(fit$subj), 1:n))
+    stopifnot(identical(as.integer(fit$subj), d$kept))
     if (f == 1) groups[[mn]] <- rbind(group_mean = m$lower + (m$upper - m$lower) * plogis(r$mu), sd_logit = r$sigma)
     for (i in 1:n) {
       lp <- m$lp(unlist(fit[i, m$names]), d$choice[i, ], d$win[i, ], d$loss[i, ])

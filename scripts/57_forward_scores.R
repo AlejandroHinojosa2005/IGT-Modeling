@@ -10,13 +10,15 @@
 # WSLS: P(stay | gain) and P(shift | loss) from the earlier trials, with one added stay and one added shift (so 1/2
 # before any data); a shift is spread evenly over the other three decks, as in script 43b.
 # Usage (from the project folder):
-#   Rscript scripts/57_forward_scores.R <data> <model> [part=P parts=N] [every=k] [who=file.csv] [quick]
+#   Rscript scripts/57_forward_scores.R <data> <model> [part=P parts=N] [every=k] [who=file.csv] [prior=NAME] [quick]
 #     data: horstmann or replication
 #     model: orl, variant, orl_alpha, variant_alpha, vse, vse_split, eef, nova, wsls
 #     part=P parts=N: run the P-th of N groups of participants (to run several at once)
 #     every=k: refit every k trials instead of every trial (faster; predictions still use only earlier trials)
 #     who=file.csv: only the participants in the file (columns sample and subj; rows with split = train are skipped),
 #                   e.g. centaur/psych101_igt_match.csv, to score only the participants Centaur did not train on
+#     prior=NAME: take the group prior from script 54's fits on NAME instead of the other sample (e.g.
+#                 prior=replication438 for Horstmann); the output then goes to output/forward/<data>_prior-NAME/
 #     quick: the first 3 participants, for testing (and the prior from whatever folds of the other sample exist)
 # Output: output/forward/<data>/<model>_partP.rds: lp, the log-probability of each scored choice (participants x
 # trials 2-100, rows named by participant), and each person's parameters after their last fit.
@@ -38,7 +40,7 @@ source("scripts/43_prereg_data.R")
 source("scripts/50_hybrid_model.R")                       # also loads script 43b (the eight models)
 d <- load_set(data_name)
 n <- nrow(d$choice)
-other <- if (data_name == "horstmann") "replication" else "horstmann"
+other <- opt("prior", if (data_name == "horstmann") "replication" else "horstmann")
 
 who <- 1:n
 if (who_file != "") {
@@ -100,7 +102,7 @@ if (model == "wsls") {
   }
 }
 
-out_dir <- file.path("output/forward", data_name)
+out_dir <- file.path("output/forward", if (opt("prior", "") == "") data_name else paste0(data_name, "_prior-", other))
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 saveRDS(list(data = data_name, model = model, who = who, lp = lp, par_last = par_last, prior_from = other,
              every = every),

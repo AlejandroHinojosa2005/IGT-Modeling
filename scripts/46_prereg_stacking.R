@@ -11,7 +11,8 @@
 # If stacking weights cannot be fit for one person and fold, that person and fold use the shared weights (registration,
 # "If something goes wrong"); the number of times this happens is printed.
 # Usage (from the project folder): Rscript scripts/46_prereg_stacking.R <data>
-#   data: replication, simulated, replication342 (robustness check 5), or horstmann (reproduces script 36, as a check)
+#   data: replication, simulated, replication342 (robustness check 5), replication438 (without the repeated
+#         records; exploratory), or horstmann (reproduces script 36, as a check)
 # Run it with the project's renv (loo 2.10.1, as for script 36): personal weights are fit to only about 90 choices,
 # and other loo versions or machines can stop the optimizer at slightly different weights (a check against script 36
 # with loo 2.6.0 on Linux changed the shrinkage total by about 1). The versions used are printed and saved.

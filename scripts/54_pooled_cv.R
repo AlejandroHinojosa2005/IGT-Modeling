@@ -13,7 +13,7 @@
 # never inform it. Starting points: the unpooled fit for the same fold (scripts 35, 45, 50b), moved just inside the
 # limits. WSLS needs no fitting and is not refit.
 # Usage (from the project folder): Rscript scripts/54_pooled_cv.R <data> <model> <fold> [quick]
-#   data: horstmann or replication; model: orl, variant, orl_alpha, variant_alpha, vse, vse_split, eef, nova
+#   data: horstmann, replication or replication438 (without the two repeated records); model: orl, variant, orl_alpha, variant_alpha, vse, vse_split, eef, nova
 #   quick: the first 12 participants and 3 rounds, for testing
 args <- commandArgs(trailingOnly = TRUE)
 data_name <- args[1]
@@ -23,18 +23,20 @@ quick <- "quick" %in% args
 
 source("scripts/43_prereg_data.R")
 source("scripts/50_hybrid_model.R")                      # also loads script 43b (the eight models)
-d <- load_set(data_name)
+src <- cv_source(data_name)                              # replication438 starts from the replication fits
+d <- load_set(src)
 m <- if (model == "nova") hybrid_models$hybrid else models[[model]]
 stopifnot(!is.null(m))
 n <- nrow(d$choice)
-who <- if (quick) 1:12 else 1:n
+who <- which(keep_of(data_name, d$study))               # rows of the source data set (all, except replication438)
+if (quick) who <- head(who, 12)
 
 # The unpooled fits for this fold
 unpooled_files <- if (model == "nova") {
-  Sys.glob(sprintf("output/hybrid/cv/%s/hybrid_fold%02d_part*.rds", data_name, fold))
-} else if (data_name == "horstmann") {
+  Sys.glob(sprintf("output/hybrid/cv/%s/hybrid_fold%02d_part*.rds", src, fold))
+} else if (src == "horstmann") {
   sprintf("output/cv_mle/%s_fold%02d.rds", model, fold)
-} else Sys.glob(sprintf("output/prereg/cv/%s/%s_fold%02d_part*.rds", data_name, model, fold))
+} else Sys.glob(sprintf("output/prereg/cv/%s/%s_fold%02d_part*.rds", src, model, fold))
 unpooled_files <- unpooled_files[!grepl("_quick", unpooled_files)]
 start <- do.call(rbind, lapply(unpooled_files, function(x) { r <- readRDS(x); if (is.data.frame(r)) r else r$fit }))
 start <- start[order(start$subj), ]

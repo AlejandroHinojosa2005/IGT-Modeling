@@ -13,26 +13,31 @@
 #    weights fit on the other nine folds)
 # Also described, not tested: NOVA's weight in the mix of nine, the median per-person difference from ORL + alpha, the
 # five largest losses, and the fitted Q0 and D.
-# Usage (from the project folder): Rscript scripts/50d_nova_replication.R
+# Usage (from the project folder): Rscript scripts/50d_nova_replication.R [data]
+#   data: replication (the default, as committed) or replication438 (without the two repeated records; the same fits,
+#         an exploratory check). Saves output/hybrid/nova_<data>.rds.
 library(loo)
 source("scripts/43_prereg_data.R")
 source("scripts/50_hybrid_model.R")
-d <- load_set("replication")
-s <- readRDS("output/prereg/stacking_replication.rds")
+data_name <- commandArgs(trailingOnly = TRUE)[1]
+if (is.na(data_name)) data_name <- "replication"
+d <- load_kept(data_name)
+s <- readRDS(sprintf("output/prereg/stacking_%s.rds", data_name))
 rows <- s$rows
 n <- max(rows$subj)
-stopifnot(n == 440, nrow(d$choice) == n, nrow(rows) == n * 99)
+stopifnot(n == length(d$kept), nrow(d$choice) == n, nrow(rows) == n * 99)
 row_of <- function(i, trials) (i - 1) * 99 + trials - 1
 
 # NOVA's held-out predictions, in the rows of script 46
 m <- hybrid_models$hybrid
 fits <- lapply(1:10, function(f) {
-  files <- Sys.glob(sprintf("output/hybrid/cv/replication/hybrid_fold%02d_part*.rds", f))
+  files <- Sys.glob(sprintf("output/hybrid/cv/%s/hybrid_fold%02d_part*.rds", cv_source(data_name), f))
   files <- files[!grepl("_quick", files)]
   if (!length(files)) stop("no NOVA fits for fold ", f)
   fit <- do.call(rbind, lapply(files, function(x) readRDS(x)$fit))
   fit <- fit[order(fit$subj), ]
-  stopifnot(identical(as.integer(fit$subj), 1:n))
+  fit <- fit[fit$subj %in% d$kept, ]                    # the participants this data set uses, in order
+  stopifnot(identical(as.integer(fit$subj), d$kept))
   fit
 })
 nova <- rep(NA, nrow(rows))
@@ -83,4 +88,4 @@ list(median_per_person = round(median(x), 2), five_largest_losses = unname(round
 par_avg <- function(p) rowMeans(sapply(fits, function(z) z[[p]]))
 round(rbind(Q0 = summary(par_avg("Q0")), D = summary(par_avg("D"))), 3)
 
-saveRDS(list(nova = nova, per = per, predictions = predictions, w_nine = w_nine), "output/hybrid/nova_replication.rds")
+saveRDS(list(nova = nova, per = per, predictions = predictions, w_nine = w_nine), sprintf("output/hybrid/nova_%s.rds", data_name))

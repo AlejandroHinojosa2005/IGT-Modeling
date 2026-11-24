@@ -86,6 +86,8 @@ Horstmann results of scripts 36–38, 42 and 42b.
 | `56_identity_check.R` | VSE's exploration term equals ORL's perseverance with a negative weight, on every trial of both samples | seconds |
 | `57_forward_scores.R` | Forward predictions for the Centaur comparison: each choice from a fit to the earlier trials only, under the other sample's group prior | about 5 seconds per person and model (NOVA about 10); everyone in both samples, four at a time, an hour or two |
 | `57b_forward_compare.R` | Our models, their shared mixes and Centaur, forward, on the same people and choices | seconds |
+| `58_duplicates.R` | Checks that the only repeated records in the data are Kjome 2/17 and Wood 298/299 (found when matching to Psych-101), and runs the registered tests on the 438 left without the second record of each pair, next to the 440 as registered | seconds, after scripts 46 and 47 on `replication438` |
+| `58_duplicates_chain.sh` | Every step that combines participants, rerun without the repeated records (46, 47, 58, 50d, 54–54c, 57, 57b), one after another and resumable: `caffeinate -i bash scripts/58_duplicates_chain.sh` | about 6–7 h |
 | `55_make_stan.py` | Writes the hierarchical Stan models (`stan/hier/`) from one copy of the likelihood functions | seconds |
 | `55a_stan_check.R` | Every Stan model compiles, and its likelihood equals the R functions' on every trial | minutes |
 | `55b_stan_recovery.R` | Parameter recovery for one Stan model (60 simulated players) | about 1 h per model |
