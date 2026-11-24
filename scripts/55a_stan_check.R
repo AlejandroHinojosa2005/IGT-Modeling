@@ -3,6 +3,8 @@
 #   2. the Stan likelihood functions give the same log-probability for every trial as the R functions used for all
 #      maximum-likelihood fits (scripts 43b and 50), for random parameters within the limits and every Horstmann
 #      participant (stan/hier/check_lp.stan, run with the fixed_param sampler). Differences should be about 1e-12.
+#      CmdStan writes draws to text with 6 significant figures unless told otherwise, which by itself gives
+#      differences of up to 5e-7 to 5e-5 (one rounding step at each value's size); sig_figs = 18 keeps full precision.
 # Usage (from the project folder): Rscript scripts/55a_stan_check.R
 library(cmdstanr)
 library(posterior)
@@ -41,7 +43,8 @@ for (m in stan_models) {
   family <- if (m %in% c("vse", "vse_split")) 2L else if (m == "eef") 3L else 1L
   fit <- check$sample(data = list(N = n, T = 100, choice = matrix(as.integer(d$choice), n, 100), win = d$win,
                                   loss = d$loss, family = family, par = par9),
-                      fixed_param = TRUE, chains = 1, iter_sampling = 1, refresh = 0, show_messages = FALSE)
+                      fixed_param = TRUE, chains = 1, iter_sampling = 1, refresh = 0, show_messages = FALSE,
+                      sig_figs = 18)
   dr <- fit$draws("lp", format = "draws_matrix")
   lp_s <- matrix(NA, n, 100)
   for (i in 1:n) lp_s[i, ] <- as.numeric(dr[1, sprintf("lp[%d,%d]", i, 1:100)])
