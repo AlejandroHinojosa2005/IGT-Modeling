@@ -84,7 +84,7 @@ Horstmann results of scripts 36–38, 42 and 42b.
 | `54b_pooled_score.R` | Pooled against unpooled fits, NOVA against ORL + α both pooled, and the mixes | minutes |
 | `54c_pooled_predictions.R` | The pooled fits on the replication sample: five tests written down first (`predictions/pooled_replication.md`) | seconds, after script 54b |
 | `56_identity_check.R` | VSE's exploration term equals ORL's perseverance with a negative weight, on every trial of both samples | seconds |
-| `57_forward_scores.R` | Forward predictions for the Centaur comparison: each choice from a fit to the earlier trials only, under the other sample's group prior | about a minute per person and model |
+| `57_forward_scores.R` | Forward predictions for the Centaur comparison: each choice from a fit to the earlier trials only, under the other sample's group prior | about 5 seconds per person and model (NOVA about 10); everyone in both samples, four at a time, an hour or two |
 | `57b_forward_compare.R` | Our models, their shared mixes and Centaur, forward, on the same people and choices | seconds |
 | `55_make_stan.py` | Writes the hierarchical Stan models (`stan/hier/`) from one copy of the likelihood functions | seconds |
 | `55a_stan_check.R` | Every Stan model compiles, and its likelihood equals the R functions' on every trial | minutes |

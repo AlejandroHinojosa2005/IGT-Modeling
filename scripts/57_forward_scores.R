@@ -20,8 +20,7 @@
 #     quick: the first 3 participants, for testing (and the prior from whatever folds of the other sample exist)
 # Output: output/forward/<data>/<model>_partP.rds: lp, the log-probability of each scored choice (participants x
 # trials 2-100, rows named by participant), and each person's parameters after their last fit.
-# Cost: 99 fits per person and model, about a minute per person and model. Run it for the participants Centaur is
-# scored on rather than everyone.
+# Cost: 99 fits per person and model, about 5 seconds per person and model on one core (NOVA about 10).
 args <- commandArgs(trailingOnly = TRUE)
 data_name <- args[1]
 model <- args[2]
