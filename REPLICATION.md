@@ -97,6 +97,7 @@ Horstmann results of scripts 36–38, 42 and 42b.
 | `kodiak/stan_setup.sh`, `kodiak/stan_cv.sh` | The hierarchical fits on Kodiak: one-time setup, then 88 jobs per data set | about a day |
 | `centaur/run_centaur.sh`, `kodiak/centaur.sh` | The Centaur benchmark from start to finish on Kodiak's GPUs or a rented GPU (`centaur/RENTING.md`) | about 1 h |
 | `52_model_subsets.R` | The shared mix with fewer models: without one model at a time, and two sets of five | minutes |
+| `60_paper2_figures.R` | The figures for paper 2, drawn from the saved results above (nothing refit), in `output/figures/paper2/`; Figure 7 needs the Centaur scores | seconds |
 
 ```
 Rscript scripts/44b_switch_simulation.R
@@ -184,4 +185,10 @@ The Centaur scores (on Kodiak: `qsub kodiak/centaur.sh`; on a rented GPU: `centa
 
 ```
 bash centaur/run_centaur.sh marcelbinz/Llama-3.1-Centaur-70B centaur/centaur70b_scores.csv
+```
+
+The figures for paper 2 (from the project folder; in Positron, open the folder and `source()` the script):
+
+```
+Rscript scripts/60_paper2_figures.R
 ```
