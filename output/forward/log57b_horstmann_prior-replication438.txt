@@ -1,0 +1,30 @@
+This is loo version 2.10.1
+- Online documentation and vignettes at mc-stan.org/loo
+- As of v2.0.0 loo defaults to 1 core but we recommend using as many as possible. Use the 'cores' argument or set options(mc.cores = NUM_CORES) for an entire session. 
+models: orl variant orl_alpha variant_alpha vse vse_split eef nova wsls 
+people: 162 
+                  total per_choice probability
+mix_five_nova -16464.55     -1.027       0.358
+mix_eight     -16551.96     -1.032       0.356
+nova          -16683.97     -1.040       0.353
+variant       -16826.81     -1.049       0.350
+variant_alpha -16928.23     -1.056       0.348
+orl_alpha     -17029.03     -1.062       0.346
+eef           -17200.79     -1.073       0.342
+orl           -17208.60     -1.073       0.342
+wsls          -18052.21     -1.126       0.324
+vse           -18248.36     -1.138       0.321
+vse_split     -19899.24     -1.241       0.289
+chance        -22233.39     -1.386       0.250
+each against mix_eight 
+                 diff    se     z better_for
+orl            -656.6  76.3  -8.6         36
+variant        -274.8  53.7  -5.1         58
+orl_alpha      -477.1  64.8  -7.4         39
+variant_alpha  -376.3  47.7  -7.9         40
+vse           -1696.4 116.2 -14.6          4
+vse_split     -3347.3 279.6 -12.0          1
+eef            -648.8  55.3 -11.7         31
+nova           -132.0  49.1  -2.7         64
+wsls          -1500.3 130.4 -11.5         29
+mix_five_nova    87.4  18.4   4.7        103

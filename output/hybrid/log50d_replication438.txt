@@ -1,0 +1,24 @@
+This is loo version 2.10.1
+- Online documentation and vignettes at mc-stan.org/loo
+- As of v2.0.0 loo defaults to 1 core but we recommend using as many as possible. Use the 'cores' argument or set options(mc.cores = NUM_CORES) for an entire session. 
+[1] 0
+[1] 0
+[1] 0.2242009
+                                 diff    se    z better_for  met
+P1_nova_vs_orl_alpha           -284.6 275.8 -1.0        214 TRUE
+P2_nine_vs_eight                160.4  29.8  5.4        247 TRUE
+P3_five_nova_vs_eight           133.7  33.9  3.9        237 TRUE
+P4_five_nova_vs_five_orl_alpha  162.8  33.4  4.9        245 TRUE
+          orl       variant     orl_alpha variant_alpha           vse 
+        0.037         0.064         0.028         0.122         0.080 
+    vse_split           eef          wsls          nova 
+        0.191         0.090         0.059         0.330 
+$median_per_person
+[1] -0.05
+
+$five_largest_losses
+[1] -225.1  -58.7  -49.2  -48.5  -39.0
+
+   Min. 1st Qu. Median  Mean 3rd Qu. Max.
+Q0   -5  -1.982  1.158 0.753    3.90    5
+D     0   0.625  0.898 0.755    0.99    1

@@ -1,0 +1,28 @@
+[[1]]
+[1] "replication:2"  "replication:17"
+
+[[2]]
+[1] "replication:298" "replication:299"
+
+[1] "Kjome" "Wood"  "Kjome" "Wood" 
+As registered (N = 440):
+      diff    se    z better_for   N  met
+H1  1538.1 122.6 12.5        328 440 TRUE
+H1b  898.1  77.5 11.6        308 440 TRUE
+H2   249.3  34.2  7.3        269 440 TRUE
+H3   172.8  26.1  6.6        263 440 TRUE
+H4   141.5  22.2  6.4        270 440 TRUE
+H5    67.6  14.2  4.8        258 440 TRUE
+H7   176.2  26.9  6.5        257 440 TRUE
+Without the two repeated records (N = 438):
+      diff    se    z better_for   N  met
+H1  1534.5 122.6 12.5        325 438 TRUE
+H1b  895.0  77.5 11.6        305 438 TRUE
+H2   251.3  34.0  7.4        268 438 TRUE
+H3   174.7  26.3  6.7        267 438 TRUE
+H4   118.7  22.0  5.4        247 438 TRUE
+H5    65.8  13.9  4.7        248 438 TRUE
+H7   168.8  27.0  6.3        257 438 TRUE
+Change in z (438 minus 440):
+[1] -0.03 -0.04  0.09  0.03 -0.98 -0.04 -0.28
+Same tests met: TRUE 

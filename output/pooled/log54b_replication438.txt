@@ -1,0 +1,58 @@
+This is loo version 2.10.1
+- Online documentation and vignettes at mc-stan.org/loo
+- As of v2.0.0 loo defaults to 1 core but we recommend using as many as possible. Use the 'cores' argument or set options(mc.cores = NUM_CORES) for an entire session. 
+[1] 0
+                 diff     se   z better_for
+orl             344.2   68.7 5.0        258
+variant         382.1   86.7 4.4        251
+orl_alpha       441.5  109.9 4.0        241
+variant_alpha   531.9  124.9 4.3        248
+vse            1103.8  426.6 2.6        229
+vse_split     11501.1 6204.3 1.9        240
+eef            6661.7 6431.9 1.0        235
+nova           1184.2  276.8 4.3        259
+      diff         se          z better_for 
+     458.1       71.7        6.4      249.0 
+                                     diff   se    z better_for
+eight_pooled_vs_unpooled           -339.5 35.4 -9.6        144
+five_nova_pooled_vs_eight_unpooled -168.9 41.8 -4.0        178
+$orl
+            Arew  Apun Kprime betaF  betaP
+group_mean 0.281 0.094  0.262 1.939 -0.366
+sd_logit   1.500 0.681  1.571 0.315  0.840
+
+$variant
+            Arew  Apun Kprime betaF betaPw betaPl
+group_mean 0.156 0.059  0.405 1.397  0.741 -0.928
+sd_logit   1.024 0.792  0.655 0.303  0.650  0.598
+
+$orl_alpha
+           Arew  Apun Kprime betaF  betaP alpha
+group_mean 0.32 0.197  0.216 1.754 -0.610 0.530
+sd_logit   1.83 0.920  1.746 0.353  0.857 0.701
+
+$variant_alpha
+            Arew  Apun Kprime betaF betaPw betaPl alpha
+group_mean 0.250 0.156  0.380 1.429  0.062 -0.625 0.587
+sd_logit   1.601 1.182  0.739 0.409  0.756  0.600 0.663
+
+$vse
+           theta Delta alpha  phi  beta
+group_mean 0.225 0.590 0.277 0.58 0.804
+sd_logit   1.494 1.325 2.238 0.33 0.784
+
+$vse_split
+           theta Delta alpha   phi  beta    psi
+group_mean 0.167 0.548 0.298 0.693 0.906 -0.069
+sd_logit   1.905 1.586 2.476 0.296 0.997  0.155
+
+$eef
+           theta lambda   phi  beta
+group_mean 0.222  0.486 0.304 0.826
+sd_logit   1.268  1.183 0.498 0.424
+
+$nova
+            Arew  Apun Kprime betaF  betaP alpha    Q0     D
+group_mean 0.405 0.241  0.398 1.575 -0.332 0.487 2.081 0.964
+sd_logit   1.799 1.090  0.887 0.357  0.788 0.849 1.516 2.375
+

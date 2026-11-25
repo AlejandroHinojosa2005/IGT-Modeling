@@ -30,9 +30,22 @@ but their outcomes differ on 52 trials, so they are different people.
   fit to each person on their own, so those fits are reused; only the steps that combine participants are rerun.
 - The Centaur comparison: nothing. All four records are in Centaur's training set, so none of them are scored.
 
-**Results (to fill in after the run).** Registered tests on 438 vs. 440: `output/prereg/log58_duplicates.txt`.
-NOVA: `output/hybrid/log50d_replication438.txt`. Pooled: `output/pooled/log54c_replication438.txt`.
-Forward: `output/forward/log57b_replication438.txt` and `output/forward/log57b_horstmann_prior-replication438.txt`.
+**Results (run finished November 24, 2026, 21:24).** Every test that was met with 440 is met with 438, and almost
+nothing moves. z for 440 → 438:
+
+- Registered tests (`output/prereg/log58_duplicates.txt`): H1 12.5 → 12.5, H1b 11.6 → 11.6, H2 7.3 → 7.4, H3 6.6 → 6.7,
+  H4 6.4 → 5.4, H5 4.8 → 4.7, H7 6.5 → 6.3. H4 is the only one that moves by more than 0.3. Most likely the reason is
+  that its test uses random draws (the seeded shuffles and groupings in script 47), and with two fewer people the same
+  seeds give different draws. Worth checking before the paper says so.
+- NOVA's tests (`output/hybrid/log50d_replication438.txt`): P1 −1.0, P2 5.4, P3 3.9, P4 4.9, all met as before.
+  NOVA's weight in the shared mix: .330.
+- Pooled (`output/pooled/log54c_replication438.txt`): Q1 4.3 → 4.3 (+1184.2), Q2 6.4 → 6.4 (+458.1),
+  Q3 −9.7 → −9.6 (−339.5), Q4 −4.1 → −4.0 (−168.9), Q5 −8.3 → −8.2 (−634.9). NOVA's group estimates: Q0 2.08 (was
+  2.09), D 0.96 (same).
+- Forward, F1, the mix of eight beats ORL + α (`output/forward/log57b_replication438.txt` and
+  `output/forward/log57b_horstmann_prior-replication438.txt`): Horstmann −477.1, SE 64.8, z −7.4 (was −475.2, z −7.4);
+  replication −1215.8, SE 79.4, z −15.3 (was −1226.6, z −15.4). The mix of five plus NOVA still beats the mix of eight
+  (z 4.7 and 5.0, unchanged), and NOVA is still the best single model.
 
 **For the paper.** One or two sentences in Methods (the pool contains two repeated records; Psych-101 keeps one of
 each), the registered results as registered, and the N = 438 results as a robustness check next to robustness check 5.
