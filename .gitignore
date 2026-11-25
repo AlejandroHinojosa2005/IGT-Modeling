@@ -15,3 +15,4 @@ stan/hier/*
 centaur/*.csv
 Claude outputs/
 logs/
+codebook.txt
