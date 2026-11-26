@@ -71,6 +71,14 @@ ticks <- function(at, digits = 0, lead0 = TRUE) {                # tick labels w
     if (v < 0) bquote(symbol("-") * .(s)) else s
   }))
 }
+# An axis whose line runs the full width of the plot, so shaded rows never run past it, with ticks only at `at`
+axis_full <- function(at, labels, side = 1) {
+  u <- par("usr")[if (side %% 2 == 1) 1:2 else 3:4]
+  axis(side, at = u, labels = FALSE, lwd.ticks = 0)
+  axis(side, at = at, labels = labels, lwd = 0, lwd.ticks = 1, cex.axis = 0.9)
+}
+# The figure's left edge, in the current plot's units: row labels and panel titles placed here line up flush left
+left_edge <- function() grconvertX(0.012, "ndc", "user")
 # A comparison as registered (script 48): d_i = person i's summed held-out log-likelihood under a minus under b;
 # SE = sd(d) x sqrt(N), z = sum(d) / SE
 compare <- function(a, b = 0) {
@@ -86,6 +94,7 @@ per_of <- function(name) {
 # interval of the difference, in SE units); labels on the left, the replication's numbers on the right
 forest <- function(zh, zr, left, tests, xlim, threshold = 1.645, both_sides = FALSE, codes = NULL) {
   k <- length(zr); y <- k:1
+  xlim <- c(floor(xlim[1] / 2) * 2, ceiling(xlim[2] / 2) * 2)   # end on ticks, so the shaded rows end where the axis does
   plot(NA, xlim = xlim, ylim = c(0.5, k + 0.5), axes = FALSE, xlab = "", ylab = "", xaxs = "i")
   abline(h = y, col = band, lwd = 9)
   abline(v = 0, col = rule)
@@ -95,7 +104,7 @@ forest <- function(zh, zr, left, tests, xlim, threshold = 1.645, both_sides = FA
   points(zh, y + off, pch = 21, bg = "white", col = brown_light, cex = 1.1, lwd = 1.4)
   segments(zr - 1.96, y - off, zr + 1.96, y - off, col = brown, lwd = 1.4)
   points(zr, y - off, pch = 19, col = brown, cex = 1.1)
-  at <- seq(ceiling(xlim[1] / 2) * 2, xlim[2], 2)
+  at <- seq(xlim[1], xlim[2], 2)
   axis(1, at = at, labels = ticks(at), cex.axis = 0.9)
   mtext(quote(italic(z) ~ "(with its 95% interval)"), side = 1, line = 1.7, cex = 0.75)
   mtext(labs(left), side = 2, at = y, line = 0.5, adj = 1, cex = 0.75)
@@ -244,7 +253,8 @@ figure("fig2_predictions.png", 3.5, function() {
 
 # ---- Figure 3: the shared mix against ORL + alpha, person by person ------------------------------------------------
 # x: the probability ORL + alpha gave each choice (geometric mean over the person's 99 held-out choices);
-# y: how many times as likely the shared mix made the choices (the same ratio for the mix over ORL + alpha), log scale
+# y: how many times as likely the shared mix made the choices (the same ratio for the mix over ORL + alpha). Both axes
+# are linear with evenly spaced ticks; the probability runs from 0 to 1
 fig3 <- lapply(list(Horstmann = hors, Replication = repl$per), function(p)
   cbind(x = exp(p[, "orl_alpha"] / 99), ratio = exp((p[, "shared_mix"] - p[, "orl_alpha"]) / 99)))
 cat("\nFigure 3: median ratio and range\n")
@@ -256,15 +266,17 @@ figure("fig3_by_person.png", 3.2, function() {
   par(mar = c(3.1, 3.6, 2.6, 0.8))
   for (j in seq_along(fig3)) {
     f <- fig3[[j]]; better <- f[, "ratio"] > 1
-    plot(NA, xlim = c(0.2, 0.9), ylim = c(0.92, 2), log = "y", axes = FALSE, xlab = "", ylab = "")
+    stopifnot(all(f[, "ratio"] > 0.9 & f[, "ratio"] < 1.9))
+    plot(NA, xlim = c(0, 1), ylim = c(0.9, 1.9), axes = FALSE, xlab = "", ylab = "")
     abline(h = 1, col = muted, lty = 2)
     points(f[, "x"], f[, "ratio"], pch = 16, cex = 0.65,
            col = ifelse(better, adjustcolor(brown, 0.55), adjustcolor(muted, 0.7)))
-    axis(1, at = seq(0.2, 0.9, 0.1), labels = sub("^0", "", sprintf("%.1f", seq(0.2, 0.9, 0.1))), cex.axis = 0.9)
-    axis(2, at = c(0.95, 1, 1.1, 1.25, 1.5, 2), labels = c(".95", "1", "1.1", "1.25", "1.5", "2"), cex.axis = 0.9)
+    xt <- seq(0, 1, 0.2); yt <- seq(0.9, 1.9, 0.1)
+    axis(1, at = xt, labels = c("0", sub("^0", "", sprintf("%.1f", xt[2:5])), "1"), cex.axis = 0.9)
+    axis(2, at = yt, labels = c(".9", "1", sprintf("%.1f", yt[3:11])), cex.axis = 0.9)
     mtext(quote("Probability ORL +" ~ alpha ~ "gave the choice made"), side = 1, line = 1.7, cex = 0.72)
     mtext("Times as likely under the mix", side = 2, line = 2.4, cex = 0.72, las = 0)
-    text(0.9, 2, sprintf("Mix better for %d of %d", sum(better), length(better)), adj = c(1, 1), cex = 0.85)
+    text(1, 1.9, sprintf("Mix better for %d of %d", sum(better), length(better)), adj = c(1, 1), cex = 0.85)
     panel_label(LETTERS[j], sprintf("%s (N = %d)", names(fig3)[j], nrow(f)))
   }
 })
@@ -295,7 +307,8 @@ print(sapply(rates, function(r) round(c(mean_found = mean(r[[1]]), true = r[[2]]
 
 figure("fig4_simulations.png", 4.4, function() {
   start(matrix(c(1, 2, 3, 4, 4, 4), 2, byrow = TRUE), widths = c(0.526, 0.237, 0.237), heights = c(1.2, 1))
-  xr <- c(-0.15, 0.9)
+  xr <- c(-0.1, 1)
+  stopifnot(all(sapply(gains, function(g) min(g[, "lo"]) > xr[1] && max(g[, "hi"]) < xr[2])))
   for (b in seq_along(gains)) {
     g <- gains[[b]]; k <- nrow(g); y <- k:1
     par(mar = c(3, if (b == 1) 13.4 else 0.8, 3.4, 0.8))
@@ -303,15 +316,18 @@ figure("fig4_simulations.png", 4.4, function() {
     abline(h = y, col = band, lwd = 9); abline(v = 0, col = muted, lty = 2)
     segments(g[, "lo"], y, g[, "hi"], y, col = set_col, lwd = 1.6)
     points(g[, "mean"], y, pch = 19, col = set_col, cex = 1.05)
-    axis(1, at = c(0, 0.4, 0.8), labels = c("0", ".4", ".8"), cex.axis = 0.9)
-    if (b == 1) mtext(rownames(g), side = 2, at = y, line = 0.5, adj = 1, cex = 0.75)
+    axis_full(seq(0, 1, 0.2), c("0", ".2", ".4", ".6", ".8", "1"))
+    # row labels and the panel title flush with the figure's left edge, so the figure reads as one centered block
+    if (b == 1) text(left_edge(), y, rownames(g), adj = 0, cex = 0.75, xpd = NA)
     if (b == 2) mtext("Switching gain per person (log-likelihood)", side = 1, line = 1.7, cex = 0.75)
-    if (b == 1) panel_label("A", "Switching gains: real data and simulated players", line = 2.1)
+    if (b == 1) mtext(quote(bold("A") ~ ~ "Switching gains: real data and simulated players"), side = 3, line = 2.1,
+                      at = left_edge(), adj = 0, cex = 0.8, col = ink)
     mtext(bquote(bold(.(names(gains)[b])) ~ ~ .(gain_defs[[b]][[3]])), side = 3, line = 0.4, adj = 0, cex = 0.72)
   }
   par(mar = c(3.2, 13.4, 2.4, 0.8))
   k <- length(rates); y <- k:1
-  plot(NA, xlim = log10(c(0.001, 1.6)), ylim = c(0.5, k + 0.5), axes = FALSE, xlab = "", ylab = "", xaxs = "i")
+  # log scale, ticks one power of ten apart; the axis starts at .001, where "true rate 0" is drawn
+  plot(NA, xlim = log10(c(0.001, 1.3)), ylim = c(0.5, k + 0.5), axes = FALSE, xlab = "", ylab = "", xaxs = "i")
   abline(h = y, col = band, lwd = 9)
   for (j in seq_len(k)) {
     r <- rates[[j]]
@@ -323,12 +339,12 @@ figure("fig4_simulations.png", 4.4, function() {
       if (r[[2]] == 0) text(xt, y[j], "true rate 0", pos = 4, cex = 0.75, offset = 0.3)
     }
   }
-  mtext(names(rates), side = 2, at = y, line = 0.5, adj = 1, cex = 0.75)
-  axis(1, at = log10(c(0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1)), labels = c(".001", ".003", ".01", ".03", ".1", ".3", "1"),
-       cex.axis = 0.9)
+  text(left_edge(), y, names(rates), adj = 0, cex = 0.75, xpd = NA)
+  axis_full(log10(c(0.001, 0.01, 0.1, 1)), c(".001", ".01", ".1", "1"))
   mtext(quote("Switching rate" ~ delta ~ "chosen in each of the ten groups (log scale); black line: true rate"),
         side = 1, line = 1.7, cex = 0.75)
-  panel_label("B", "The rate of switching found")
+  mtext(quote(bold("B") ~ ~ "The rate of switching found"), side = 3, line = 0.6, at = left_edge(), adj = 0, cex = 0.8,
+        col = ink)
 })
 
 # ---- Figure 5: VSE's exploration bonus is ORL's perseverance with a negative weight --------------------------------
@@ -386,9 +402,17 @@ print(round(w9, 3))
 
 figure("fig6_nova.png", 5.2, function() {
   start(matrix(1:2, 2), heights = c(1.15, 1))
-  # A: weights in the mix of nine, one row per model, aligned with B
+  # A: weights in the mix of nine, one row per model. Its labels are much shorter than B's, so instead of lining up with
+  # B it is centered across the figure: the plot keeps B's width, and the space left over is split evenly between the
+  # two sides of the block made by the labels, the bars and the numbers
   par(mar = c(2.6, 15, 2.6, 8.6))
   ord <- c("nova", model_names)
+  sw <- function(s, cex, font = 1) max(strwidth(s, units = "inches", cex = cex / par("cex"), font = font))
+  gap <- 0.5 * par("mai")[2] / par("mar")[2]                    # the half line between the plot and its labels
+  left_w <- max(sw(labs(model_label[ord[-1]]), 0.75), sw("NOVA", 0.75, font = 2)) + gap
+  right_w <- sw("Horstmann, replication", 0.7) + gap
+  spare <- (par("mai")[2] + par("mai")[4] - left_w - right_w) / 2
+  par(mai = c(par("mai")[c(1, 3)], left_w + spare, right_w + spare)[c(1, 3, 2, 4)])
   k <- length(ord); y <- k:1
   plot(NA, xlim = c(0, 0.4), ylim = c(0.45, k + 0.55), axes = FALSE, xlab = "", ylab = "", xaxs = "i", yaxs = "i")
   rect(0, y + 0.02, w9["Horstmann", ord], y + 0.36, col = brown_light, border = NA)
@@ -475,12 +499,13 @@ if (!file.exists(cz_file)) {
     panel_label("A", "Each choice predicted from the ones before it")
     par(mar = c(4, 9, 2.6, 0.8))
     k <- nrow(edge_tab); y <- k:1
-    plot(NA, xlim = c(-0.1, 0.9), ylim = c(0.5, k + 0.5), axes = FALSE, xlab = "", ylab = "", xaxs = "i")
+    stopifnot(min(edge_tab[, "lo"]) > -0.1, max(edge_tab[, "hi"]) < 1)
+    plot(NA, xlim = c(-0.1, 1), ylim = c(0.5, k + 0.5), axes = FALSE, xlab = "", ylab = "", xaxs = "i")
     abline(h = y, col = band, lwd = 9); abline(v = 0, col = muted, lty = 2)
     segments(edge_tab[, "lo"], y, edge_tab[, "hi"], y, col = brown, lwd = 1.6)
     points(edge_tab[, "mean"], y, pch = 19, col = brown)
     mtext(rownames(edge_tab), side = 2, at = y, line = 0.5, adj = 1, cex = 0.72)
-    axis(1, at = c(0, 0.4, 0.8), labels = c("0", ".4", ".8"), cex.axis = 0.9)
+    axis_full(seq(0, 1, 0.2), c("0", ".2", ".4", ".6", ".8", "1"))
     mtext("Centaur minus NOVA,\nlog-probability per choice", side = 1, line = 2.5, cex = 0.72)
     panel_label("B", "Where Centaur gains")
   })
