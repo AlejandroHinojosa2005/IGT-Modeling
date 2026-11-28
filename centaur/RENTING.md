@@ -51,7 +51,8 @@ Rscript scripts/57b_forward_compare.R replication centaur/centaur70b_scores.csv
 It needs no GPU. On a rented computer with many CPU cores (64 cores runs 16 fits at once), with R and the packages
 from `renv.lock` installed:
 ```
-bash scripts/55_run_all.sh horstmann 16
 bash scripts/55_run_all.sh replication 16
-Rscript scripts/55c_stan_cv_score.R horstmann
+bash scripts/55_run_all.sh horstmann 16
+Rscript scripts/55c_stan_cv_score.R replication
+Rscript scripts/55d_stan_predictions.R replication
 ```

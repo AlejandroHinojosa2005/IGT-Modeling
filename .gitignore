@@ -16,3 +16,5 @@ centaur/*.csv
 Claude outputs/
 logs/
 codebook.txt
+output/stan/*/*_draws.rds
+*.rds.part

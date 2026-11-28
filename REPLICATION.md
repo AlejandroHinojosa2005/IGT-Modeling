@@ -91,10 +91,14 @@ Horstmann results of scripts 36–38, 42 and 42b.
 | `55_make_stan.py` | Writes the hierarchical Stan models (`stan/hier/`) from one copy of the likelihood functions | seconds |
 | `55a_stan_check.R` | Every Stan model compiles, and its likelihood equals the R functions' on every trial | minutes |
 | `55b_stan_recovery.R` | Parameter recovery for one Stan model (60 simulated players) | about 1 h per model |
-| `55_stan_fit.R` | Hierarchical Bayesian fit of one model: all trials (`full`) or one cross-validation fold | about 1 h per fit (Horstmann) |
-| `55_run_all.sh` | All 88 hierarchical fits of one data set on one machine (Mac or a rented computer), several at once | about 2 days (Horstmann, 8 cores) |
+| `55_stan_common.R` | Shared by the 55 scripts: where each fit is saved, the sampler settings and the convergence rule of the addendum | — |
+| `55_stan_fit.R` | Hierarchical Bayesian fit of one model: all trials (`full`) or one cross-validation fold; skips saved fits; `long` = the rerun of the convergence rule | about 1 h per fit (Horstmann), 3 h (replication) |
+| `55_queue.sh` | The Mac's queue: every fit, in order, unattended, with reruns; `start`, `status`, `pause`, `resume`, `stop`, `kill` | days |
+| `55_run_all.sh` | The same queue in the foreground, for a rented many-core computer | about a day per data set (64 cores) |
+| `55e_stan_jobs.R` | Lists the fits still to run, in order (used by the queue and its `status`) | seconds |
 | `55c_stan_cv_score.R` | The hierarchical cross-validation against the unpooled and pooled fits, NOVA against ORL + α, the mixes, and each fit's diagnostics | about 10 min |
-| `kodiak/stan_setup.sh`, `kodiak/stan_cv.sh` | The hierarchical fits on Kodiak: one-time setup, then 88 jobs per data set | about a day |
+| `55d_stan_predictions.R` | The registered predictions S1a–S5 (`predictions/hierarchical.md`) | seconds |
+| `kodiak/stan_setup.sh`, `kodiak/stan_cv.sh`, `kodiak/stan_submit.sh` | The hierarchical fits on Kodiak: one-time setup, then 88 jobs per data set and a chained pass of reruns | about a day |
 | `centaur/run_centaur.sh`, `kodiak/centaur.sh` | The Centaur benchmark from start to finish on Kodiak's GPUs or a rented GPU (`centaur/RENTING.md`) | about 1 h |
 | `52_model_subsets.R` | The shared mix with fewer models: without one model at a time, and two sets of five | minutes |
 | `60_paper2_figures.R` | The figures for paper 2, drawn from the saved results above (nothing refit), in `output/figures/paper2/`; Figure 7 needs the Centaur scores | seconds |
@@ -171,14 +175,28 @@ for m in orl orl_split orl_alpha orl_split_alpha nova vse vse_split eef; do Rscr
 Rscript scripts/55_stan_fit.R horstmann nova full
 ```
 
-All hierarchical fits and their cross-validation, on Kodiak (or on one machine with `bash scripts/55_run_all.sh <data> <jobs>`):
+All hierarchical fits and their cross-validation (registered as an addendum to U86SY: `predictions/hierarchical.md`).
+On the Mac, in the background (`status`, `pause`, `resume`, `stop`, `kill`; saved fits are never redone):
+
+```
+bash scripts/55_queue.sh start
+```
+
+On Kodiak, with any fits already done on the Mac copied into `output/stan/` first:
 
 ```
 bash kodiak/stan_setup.sh                  # once, on the login node
-qsub -v DATA=horstmann kodiak/stan_cv.sh
-qsub -v DATA=replication kodiak/stan_cv.sh
-Rscript scripts/55c_stan_cv_score.R horstmann
-Rscript scripts/55c_stan_cv_score.R replication
+bash kodiak/stan_submit.sh replication
+bash kodiak/stan_submit.sh horstmann
+```
+
+Then, with every fit in `output/stan/`:
+
+```
+for d in replication horstmann replication438; do
+  Rscript scripts/55c_stan_cv_score.R $d > output/stan/log55c_$d.txt 2>&1
+  Rscript scripts/55d_stan_predictions.R $d > output/stan/log55d_$d.txt 2>&1
+done
 ```
 
 The Centaur scores (on Kodiak: `qsub kodiak/centaur.sh`; on a rented GPU: `centaur/RENTING.md`):
